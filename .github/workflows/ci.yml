@@ -17,6 +17,11 @@ jobs:
           go-version: ^1.20
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
+      - name: Run gofumpt
+        run: |
+          go install mvdan.cc/gofumpt@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          find . -name '*.go' -exec gofumpt -l -w {} +
       - name: Get dependencies
         run: go mod download
       - name: Build
@@ -35,14 +40,3 @@ jobs:
         with:
           version: latest
           args: --issues-exit-code=0 --timeout=5m
-
-  fmt:
-    name: Format
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-      - name: Run gofumpt
-        run: |
-          go install mvdan.cc/gofumpt@latest
-          find . -name '*.go' -exec gofumpt -l -w {} +
