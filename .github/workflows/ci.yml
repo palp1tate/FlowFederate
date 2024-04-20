@@ -44,5 +44,5 @@ jobs:
         uses: actions/checkout@v2
       - name: Run gofumpt
         run: |
-          go get mvdan.cc/gofumpt
+          go install mvdan.cc/gofumpt@latest
           find . -name '*.go' -exec gofumpt -l -w {} +
