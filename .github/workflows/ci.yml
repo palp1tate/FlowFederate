@@ -11,29 +11,38 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v4
-      with:
-        go-version: ^1.20
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
-    - name: Get dependencies
-      run: go mod download
-    - name: Format with gofumpt
-      run: go install mvdan.cc/gofumpt@latest && gofumpt -w .
-    - name: Build
-      run: go build -v ./...
-    - name: Test
-      run: go test -v ./...
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v4
+        with:
+          go-version: ^1.20
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+      - name: Get dependencies
+        run: go mod download
+      - name: Build
+        run: go build -v ./...
+      - name: Test
+        run: go test -v ./...
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
-    - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v3
-      with:
-        version: latest
-        args: --out-format=github-actions --disable-all -E=gofumpt --max-same-issues=0 --timeout 5m --modules-download-mode=mod
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --issues-exit-code=0 --timeout=5m
+
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Run gofumpt
+        run: |
+          go get mvdan.cc/gofumpt
+          find . -name '*.go' -exec gofumpt -l -w {} +
