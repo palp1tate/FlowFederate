@@ -1,16 +1,18 @@
-api:
-  name: FlowFederate-Api
+service:
+  name: EdgeService
   host: 10.252.66.90
   tags:
-    - api
+    - edge
     - FlowFederate
-
-service:
-  edge: EdgeService
+    - service
 
 consul:
   host: 127.0.0.1
   port: 8500
+
+rabbitmq:
+  host: 127.0.0.1
+  port: 5672
 
 mysql:
   host: 127.0.0.1
@@ -18,5 +20,8 @@ mysql:
   database: FlowFederate
   user: wxy
   password: 123456
+
+client:
+  name: ClientService
 
 debug: true

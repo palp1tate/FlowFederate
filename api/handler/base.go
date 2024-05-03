@@ -14,18 +14,16 @@ import (
 )
 
 type Response struct {
-	Code  int         `json:"code"`
-	Msg   interface{} `json:"msg"`
-	Token interface{} `json:"token,omitempty"`
-	Data  interface{} `json:"data,omitempty"`
+	Code int         `json:"code"`
+	Msg  interface{} `json:"msg"`
+	Data interface{} `json:"data,omitempty"`
 }
 
-func HandleHttpResponse(c *gin.Context, code int, xcode int, token interface{}, data interface{}) {
+func HandleHttpResponse(c *gin.Context, code int, xcode int, data interface{}) {
 	response := Response{
-		Code:  xcode,
-		Msg:   errorx.GetMsg(xcode),
-		Token: token,
-		Data:  data,
+		Code: xcode,
+		Msg:  errorx.GetMsg(xcode),
+		Data: data,
 	}
 	c.JSON(code, response)
 }
@@ -51,7 +49,7 @@ func removeTopStruct(fields map[string]string) map[string]string {
 func HandleValidatorError(c *gin.Context, err error) {
 	var errs validator.ValidationErrors
 	if ok := errors.As(err, &errs); !ok {
-		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrParamsInvalid, nil, nil)
+		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrParamsInvalid, nil)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": errorx.ErrParamsInvalid,

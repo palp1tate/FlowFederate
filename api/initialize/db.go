@@ -2,8 +2,6 @@ package initialize
 
 import (
 	"fmt"
-	"github.com/palp1tate/FlowFederate/internal/model"
-
 	"github.com/palp1tate/FlowFederate/api/global"
 
 	"go.uber.org/zap"
@@ -21,13 +19,9 @@ func InitMySQL() {
 	if global.ServerConfig.Debug {
 		ormLogger = ormLogger.LogMode(logger.Info)
 	}
-	global.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		zap.S().Panic(err.Error())
-	}
-	err = global.DB.AutoMigrate(
-		&model.UserInfo{},
-	)
+	global.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: ormLogger,
+	})
 	if err != nil {
 		zap.S().Panic(err.Error())
 	}

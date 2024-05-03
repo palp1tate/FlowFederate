@@ -1,0 +1,18 @@
+syntax = "proto3";
+package pb;
+
+
+service ClientService {
+  rpc TrainModel (stream TrainModelRequest) returns (stream TrainModelResponse);
+}
+
+message TrainModelRequest {
+  bytes pt = 1;
+  int64 size = 2;
+  string conf = 3;
+}
+
+message TrainModelResponse {
+  bytes pt = 1;
+  int64 size = 2;
+}

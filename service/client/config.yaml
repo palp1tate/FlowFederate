@@ -1,12 +1,10 @@
-api:
-  name: FlowFederate-Api
+service:
+  name: ClientService
   host: 10.252.66.90
   tags:
-    - api
+    - client
     - FlowFederate
-
-service:
-  edge: EdgeService
+    - service
 
 consul:
   host: 127.0.0.1

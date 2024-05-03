@@ -1,13 +1,14 @@
 package model
 
 type UserInfo struct {
-	ID       int    `gorm:"autoIncrement:false"`
-	UserName string `gorm:"size:255;uniqueIndex;primaryKey"`
-	Password string `gorm:"size:255"`
-	Role     int    `gorm:"default:1;check:Role in (0,1)"`
-	State    int    `gorm:"default:0;check:State in (0,1)"`
+	Uuid       string `json:"uuid" gorm:"column:uuid"`
+	UserName   string `json:"user_name" gorm:"column:user_name"`
+	Password   string `json:"password" gorm:"column:password"`
+	Role       int    `json:"role" gorm:"column:role"`
+	State      int    `json:"state" gorm:"column:state"`
+	CreateTime string `json:"create_time" gorm:"column:create_time"`
 }
 
-func (u *UserInfo) TableName() string {
+func (m *UserInfo) TableName() string {
 	return "user_info"
 }
