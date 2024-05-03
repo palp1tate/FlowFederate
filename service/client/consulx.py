@@ -8,8 +8,14 @@ class Consul(object):
 
     def register(self, address, port, service_name, tags, service_id):
         check = consul.Check.tcp(address, port, "10s", "30s", "15s")
-        self._consul.agent.service.register(name=service_name, service_id=service_id, tags=tags,
-                                            address=address, port=port, check=check)
+        self._consul.agent.service.register(
+            name=service_name,
+            service_id=service_id,
+            tags=tags,
+            address=address,
+            port=port,
+            check=check,
+        )
 
     def deregister(self, server_id):
         self._consul.agent.service.deregister(service_id=server_id)
@@ -17,14 +23,14 @@ class Consul(object):
     def _fetch_and_format_services(self, name):
         _, nodes = self._consul.health.service(service=name, passing=True)
         if len(nodes) == 0:
-            raise Exception('service is empty.')
+            raise Exception("service is empty.")
         services = []
         for node in nodes:
-            service = node.get('Service')
+            service = node.get("Service")
             service_address = f"{service['Address']}:{service['Port']}"
             services.append(service_address)
         if not services:
-            raise Exception('No available services found for: ' + name)
+            raise Exception("No available services found for: " + name)
         return services
 
     def get_service(self, name):

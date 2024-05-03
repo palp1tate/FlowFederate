@@ -21,7 +21,7 @@ class cnnmnist(nn.Module):
         x3 = F.relu(self.fc1(x2))
         x3 = F.dropout(x3, training=self.training)
         x4 = self.fc(x3)
-        return [x1,x2,x3,x4], F.log_softmax(x4,dim=1)
+        return [x1, x2, x3, x4], F.log_softmax(x4, dim=1)
 
 
 class LeNet(nn.Module):
@@ -67,4 +67,3 @@ class SimpleCNN(nn.Module):
         x4 = F.relu(self.fc2(x3))
         x5 = self.fc3(x4)
         return [x1, x2, x3, x4, x5], F.log_softmax(x4, dim=1)
-
