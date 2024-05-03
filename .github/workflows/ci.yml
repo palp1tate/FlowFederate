@@ -54,4 +54,4 @@ jobs:
       - name: Install Black
         run: pip install black
       - name: Check Python files with Black
-        run: black --check .
+        run: black --check . --exclude ".*pb2.*\.py"
