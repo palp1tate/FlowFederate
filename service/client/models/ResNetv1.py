@@ -6,12 +6,12 @@
 
 # reference
 # https://github.com/weiaicunzai/pytorch-cifar100 Thank you.
-import torch
 import torch.nn as nn
 
 
 class BasicBlock(nn.Module):
-    """Basic Block for resnet 18 and resnet 34"""
+    """Basic Block for resnet 18 and resnet 34
+    """
 
     # BasicBlock and BottleNeck block
     # have different output size
@@ -24,24 +24,11 @@ class BasicBlock(nn.Module):
 
         # residual function
         self.residual_function = nn.Sequential(
-            nn.Conv2d(
-                in_channels,
-                out_channels,
-                kernel_size=3,
-                stride=stride,
-                padding=1,
-                bias=False,
-            ),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(
-                out_channels,
-                out_channels * BasicBlock.expansion,
-                kernel_size=3,
-                padding=1,
-                bias=False,
-            ),
-            nn.BatchNorm2d(out_channels * BasicBlock.expansion),
+            nn.Conv2d(out_channels, out_channels * BasicBlock.expansion, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels * BasicBlock.expansion)
         )
 
         # shortcut
@@ -51,14 +38,8 @@ class BasicBlock(nn.Module):
         # use 1*1 convolution to match the dimension
         if stride != 1 or in_channels != BasicBlock.expansion * out_channels:
             self.shortcut = nn.Sequential(
-                nn.Conv2d(
-                    in_channels,
-                    out_channels * BasicBlock.expansion,
-                    kernel_size=1,
-                    stride=stride,
-                    bias=False,
-                ),
-                nn.BatchNorm2d(out_channels * BasicBlock.expansion),
+                nn.Conv2d(in_channels, out_channels * BasicBlock.expansion, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(out_channels * BasicBlock.expansion)
             )
 
     def forward(self, x):
@@ -66,8 +47,8 @@ class BasicBlock(nn.Module):
 
 
 class BottleNeck(nn.Module):
-    """Residual block for resnet over 50 layers"""
-
+    """Residual block for resnet over 50 layers
+    """
     expansion = 4
 
     def __init__(self, in_channels, out_channels, stride=1):
@@ -76,22 +57,10 @@ class BottleNeck(nn.Module):
             nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(
-                out_channels,
-                out_channels,
-                stride=stride,
-                kernel_size=3,
-                padding=1,
-                bias=False,
-            ),
+            nn.Conv2d(out_channels, out_channels, stride=stride, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(
-                out_channels,
-                out_channels * BottleNeck.expansion,
-                kernel_size=1,
-                bias=False,
-            ),
+            nn.Conv2d(out_channels, out_channels * BottleNeck.expansion, kernel_size=1, bias=False),
             nn.BatchNorm2d(out_channels * BottleNeck.expansion),
         )
 
@@ -99,14 +68,8 @@ class BottleNeck(nn.Module):
 
         if stride != 1 or in_channels != out_channels * BottleNeck.expansion:
             self.shortcut = nn.Sequential(
-                nn.Conv2d(
-                    in_channels,
-                    out_channels * BottleNeck.expansion,
-                    stride=stride,
-                    kernel_size=1,
-                    bias=False,
-                ),
-                nn.BatchNorm2d(out_channels * BottleNeck.expansion),
+                nn.Conv2d(in_channels, out_channels * BottleNeck.expansion, stride=stride, kernel_size=1, bias=False),
+                nn.BatchNorm2d(out_channels * BottleNeck.expansion)
             )
 
     def forward(self, x):
@@ -114,6 +77,7 @@ class BottleNeck(nn.Module):
 
 
 class ResNet(nn.Module):
+
     def __init__(self, block, num_block, num_classes=100):
         super().__init__()
 
@@ -122,8 +86,7 @@ class ResNet(nn.Module):
         self.conv1 = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-        )
+            nn.ReLU(inplace=True))
         # we use a different inputsize than the original paper
         # so conv2_x's stride is 1
         self.conv2_x = self._make_layer(block, 64, num_block[0], 1)
@@ -171,25 +134,30 @@ class ResNet(nn.Module):
 
 
 def resnet18():
-    """return a ResNet 18 object"""
+    """ return a ResNet 18 object
+    """
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=10)
 
 
 def resnet34():
-    """return a ResNet 34 object"""
+    """ return a ResNet 34 object
+    """
     return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=10)
 
 
 def resnet50():
-    """return a ResNet 50 object"""
+    """ return a ResNet 50 object
+    """
     return ResNet(BottleNeck, [3, 4, 6, 3], num_classes=10)
 
 
 def resnet101():
-    """return a ResNet 101 object"""
+    """ return a ResNet 101 object
+    """
     return ResNet(BottleNeck, [3, 4, 23, 3], num_classes=10)
 
 
 def resnet152():
-    """return a ResNet 152 object"""
+    """ return a ResNet 152 object
+    """
     return ResNet(BottleNeck, [3, 8, 36, 3], num_classes=10)

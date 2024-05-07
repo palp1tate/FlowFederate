@@ -8,7 +8,3 @@ type UserInfo struct {
 	State      int    `json:"state" gorm:"column:state"`
 	CreateTime string `json:"create_time" gorm:"column:create_time"`
 }
-
-func (m *UserInfo) TableName() string {
-	return "user_info"
-}

@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -203,7 +204,7 @@ class ResNet(nn.Module):
         feats["preact_feats"] = [f0, f1_pre, f2_pre, f3_pre]
         feats["pooled_feat"] = avg
 
-        return out, feats
+        return feats, out
 
 
 def resnet8():

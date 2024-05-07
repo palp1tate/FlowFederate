@@ -12,4 +12,5 @@ service EdgeService {
 
 message TrainRequest {
   string conf = 1;
+  string user_name = 2;
 }

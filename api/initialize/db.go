@@ -2,9 +2,12 @@ package initialize
 
 import (
 	"fmt"
-	"github.com/palp1tate/FlowFederate/api/global"
 
+	"gorm.io/gorm/schema"
+
+	"github.com/palp1tate/FlowFederate/api/global"
 	"go.uber.org/zap"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -19,8 +22,15 @@ func InitMySQL() {
 	if global.ServerConfig.Debug {
 		ormLogger = ormLogger.LogMode(logger.Info)
 	}
-	global.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	global.DB, err = gorm.Open(mysql.New(mysql.Config{
+		DSN:                      dsn,
+		DefaultStringSize:        256,
+		DisableDatetimePrecision: true,
+	}), &gorm.Config{
 		Logger: ormLogger,
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
 	})
 	if err != nil {
 		zap.S().Panic(err.Error())

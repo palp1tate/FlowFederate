@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x63lient.proto\x12\x02pb\";\n\x11TrainModelRequest\x12\n\n\x02pt\x18\x01 \x01(\x0c\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x0c\n\x04\x63onf\x18\x03 \x01(\t\".\n\x12TrainModelResponse\x12\n\n\x02pt\x18\x01 \x01(\x0c\x12\x0c\n\x04size\x18\x02 \x01(\x03\x32P\n\rClientService\x12?\n\nTrainModel\x12\x15.pb.TrainModelRequest\x1a\x16.pb.TrainModelResponse(\x01\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x63lient.proto\x12\x02pb\"L\n\x11TrainModelRequest\x12\n\n\x02pt\x18\x01 \x01(\x0c\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x0c\n\x04\x63onf\x18\x03 \x01(\t\x12\x0f\n\x07task_id\x18\x04 \x01(\x03\".\n\x12TrainModelResponse\x12\n\n\x02pt\x18\x01 \x01(\x0c\x12\x0c\n\x04size\x18\x02 \x01(\x03\x32P\n\rClientService\x12?\n\nTrainModel\x12\x15.pb.TrainModelRequest\x1a\x16.pb.TrainModelResponse(\x01\x30\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,9 +22,9 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'client_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_TRAINMODELREQUEST']._serialized_start=20
-  _globals['_TRAINMODELREQUEST']._serialized_end=79
-  _globals['_TRAINMODELRESPONSE']._serialized_start=81
-  _globals['_TRAINMODELRESPONSE']._serialized_end=127
-  _globals['_CLIENTSERVICE']._serialized_start=129
-  _globals['_CLIENTSERVICE']._serialized_end=209
+  _globals['_TRAINMODELREQUEST']._serialized_end=96
+  _globals['_TRAINMODELRESPONSE']._serialized_start=98
+  _globals['_TRAINMODELRESPONSE']._serialized_end=144
+  _globals['_CLIENTSERVICE']._serialized_start=146
+  _globals['_CLIENTSERVICE']._serialized_end=226
 # @@protoc_insertion_point(module_scope)
