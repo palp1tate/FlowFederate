@@ -5,12 +5,12 @@ import pika
 
 class RabbitMQConnection:
     def __init__(
-            self,
-            host="127.0.0.1",
-            port=5672,
-            virtual_host="/",
-            username="guest",
-            password="guest",
+        self,
+        host="127.0.0.1",
+        port=5672,
+        virtual_host="/",
+        username="guest",
+        password="guest",
     ):
         self.credentials = pika.PlainCredentials(username, password)
         self.parameters = pika.ConnectionParameters(
@@ -28,10 +28,12 @@ class RabbitMQConnection:
 
     @staticmethod
     def send_message_to_queue(
-            connection: pika.BlockingConnection, services: [str], conf: dict, user_name: str
+        connection: pika.BlockingConnection, services: [str], conf: dict, user_name: str
     ):
         channel = connection.channel()
-        message = json.dumps({"services": services, "conf": conf, "user_name": user_name})
+        message = json.dumps(
+            {"services": services, "conf": conf, "user_name": user_name}
+        )
         channel.queue_declare(queue="train_queue")
         channel.basic_publish(exchange="", routing_key="train_queue", body=message)
 

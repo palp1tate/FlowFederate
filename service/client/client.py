@@ -21,41 +21,65 @@ from util import *
 
 conf = config.load_configuration("config.yaml")
 client_credentials = config.load_client_credentials("../../internal/authorization")
-server_credentials = config.load_server_credentials('../../internal/authorization')
-service_conf = conf['service']
-consul_conf = conf['consul']
+server_credentials = config.load_server_credentials("../../internal/authorization")
+service_conf = conf["service"]
+consul_conf = conf["consul"]
 
 # Set up basic logging
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 STREAM_PART_SIZE = 2 * 1024 * 1024
 MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024
-options = [('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-           ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH), ('grpc.enable_retries', 1)]
+options = [
+    ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
+    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+    ("grpc.enable_retries", 1),
+]
 COMMON_NAME = "ccc"
 server = None
 service_id = str(uuid.uuid4())
-consul = Consul(consul_host=consul_conf['host'], consul_port=consul_conf['port'])
+consul = Consul(consul_host=consul_conf["host"], consul_port=consul_conf["port"])
 engine = init_engine()
 
 
 def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
     try:
-        model_name = configuration['model_name']
-        dataset_type = configuration['type']
-        local_epochs = configuration['local_epochs']
-        batch_size = configuration['batch_size']
-        learning_rate = configuration['lr']
-        momentum = configuration['momentum']
+        model_name = configuration["model_name"]
+        dataset_type = configuration["type"]
+        local_epochs = configuration["local_epochs"]
+        batch_size = configuration["batch_size"]
+        learning_rate = configuration["lr"]
+        momentum = configuration["momentum"]
         new_session = sessionmaker(engine)
         with new_session() as session:
-            client = session.query(Client).filter_by(task_id=task_id, client_id=service_id).first()
+            client = (
+                session.query(Client)
+                .filter_by(task_id=task_id, client_id=service_id)
+                .first()
+            )
             if not client:
-                client = Client(task_id=task_id, client_id=service_id, created_at=datetime.now(),
-                                updated_at=datetime.now(), model=model_name, dataset=dataset_type, type="通用模型",
-                                status="正常", current_round=0, total_round=local_epochs, accuracy=None,
-                                loss=None, cpu=get_cpu_usage(), memory=get_memory_usage(), disk=get_disk_usage(),
-                                progress="0%")
+                client = Client(
+                    task_id=task_id,
+                    client_id=service_id,
+                    created_at=datetime.now(),
+                    updated_at=datetime.now(),
+                    model=model_name,
+                    dataset=dataset_type,
+                    type="通用模型",
+                    status="正常",
+                    current_round=0,
+                    total_round=local_epochs,
+                    accuracy=None,
+                    loss=None,
+                    cpu=get_cpu_usage(),
+                    memory=get_memory_usage(),
+                    disk=get_disk_usage(),
+                    progress="0%",
+                )
                 session.add(client)
                 session.commit()
 
@@ -64,7 +88,8 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
 
         logging.info(
             f"Model: {model_name}, Dataset: {dataset_type}, Local epochs: {local_epochs}, Batch size: {batch_size}, "
-            f"Learning rate: {learning_rate}, Momentum: {momentum}")
+            f"Learning rate: {learning_rate}, Momentum: {momentum}"
+        )
 
         local_model = get_model(model_name)
 
@@ -76,23 +101,31 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
         train_loader = DataLoader(train_datasets, batch_size=batch_size, shuffle=True)
         eval_loader = DataLoader(eval_datasets, batch_size=batch_size, shuffle=False)
 
-        optimizer_name = configuration.get('optimizer', 'sgd')  # 默认使用SGD
-        if optimizer_name == 'sgd':
-            optimizer = torch.optim.SGD(local_model.parameters(), lr=learning_rate, momentum=momentum)
-        elif optimizer_name == 'adam':
-            optimizer = torch.optim.Adam(local_model.parameters(), lr=learning_rate, betas=(0.9, 0.999))
-        elif optimizer_name == 'rmsprop':
-            optimizer = torch.optim.RMSprop(local_model.parameters(), lr=learning_rate, alpha=0.99)
+        optimizer_name = configuration.get("optimizer", "sgd")  # 默认使用SGD
+        if optimizer_name == "sgd":
+            optimizer = torch.optim.SGD(
+                local_model.parameters(), lr=learning_rate, momentum=momentum
+            )
+        elif optimizer_name == "adam":
+            optimizer = torch.optim.Adam(
+                local_model.parameters(), lr=learning_rate, betas=(0.9, 0.999)
+            )
+        elif optimizer_name == "rmsprop":
+            optimizer = torch.optim.RMSprop(
+                local_model.parameters(), lr=learning_rate, alpha=0.99
+            )
         else:
             raise ValueError(f"Unsupported optimizer type: {optimizer_name}")
         logging.info(f"Optimizer: {optimizer_name}")
 
-        loss_function_name = configuration.get('loss_function', 'cross_entropy')  # 默认为交叉熵损失
-        if loss_function_name == 'cross_entropy':
+        loss_function_name = configuration.get(
+            "loss_function", "cross_entropy"
+        )  # 默认为交叉熵损失
+        if loss_function_name == "cross_entropy":
             criterion = torch.nn.CrossEntropyLoss()
-        elif loss_function_name == 'mse':
+        elif loss_function_name == "mse":
             criterion = torch.nn.MSELoss()
-        elif loss_function_name == 'nll':
+        elif loss_function_name == "nll":
             criterion = torch.nn.NLLLoss()
         else:
             raise ValueError(f"Unsupported loss function type: {loss_function_name}")
@@ -131,11 +164,16 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
             accuracy = correct / len(eval_loader.dataset)
 
             print(
-                f'Epoch {epoch + 1}/{local_epochs}, Train Loss: {avg_train_loss:.4f}, Eval Loss: {avg_eval_loss:.4f}, '
-                f'Accuracy: {accuracy:.4f}')
+                f"Epoch {epoch + 1}/{local_epochs}, Train Loss: {avg_train_loss:.4f}, Eval Loss: {avg_eval_loss:.4f}, "
+                f"Accuracy: {accuracy:.4f}"
+            )
 
             with new_session() as session:
-                client = session.query(Client).filter_by(task_id=task_id, client_id=service_id).first()
+                client = (
+                    session.query(Client)
+                    .filter_by(task_id=task_id, client_id=service_id)
+                    .first()
+                )
                 if client:
                     client.updated_at = datetime.now()
                     client.current_round = epoch + 1
@@ -154,7 +192,11 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
     except Exception as exc:
         new_session = sessionmaker(engine)
         with new_session() as session:
-            client = session.query(Client).filter_by(task_id=task_id, client_id=service_id).first()
+            client = (
+                session.query(Client)
+                .filter_by(task_id=task_id, client_id=service_id)
+                .first()
+            )
             if client is not None:
                 client.status = "异常"
                 client.updated_at = datetime.now()
@@ -192,30 +234,39 @@ class ClientServicer(client_pb2_grpc.ClientServiceServicer):
                         break
         except json.JSONDecodeError as exception:
             logging.error(f"JSON decoding error: {exception}")
-            context.set_details('Invalid JSON configuration.')
+            context.set_details("Invalid JSON configuration.")
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             return client_pb2.TrainModelResponse()
         except Exception as exception:
             logging.error(f"Error during model training: {exception}")
-            context.set_details(f'An error occurred during model training: {exception}')
+            context.set_details(f"An error occurred during model training: {exception}")
             context.set_code(grpc.StatusCode.INTERNAL)
             return client_pb2.TrainModelResponse()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Start the server with specified port")
-    parser.add_argument('-p', '--port', type=int, help='The port to start the server on')
+    parser.add_argument(
+        "-p", "--port", type=int, help="The port to start the server on"
+    )
     args = parser.parse_args()
     port = args.port if args.port else get_free_port()
     try:
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000), options=options)
+        server = grpc.server(
+            futures.ThreadPoolExecutor(max_workers=1000), options=options
+        )
         client_pb2_grpc.add_ClientServiceServicer_to_server(ClientServicer(), server)
         server_address = f"{service_conf['host']}:{port}"
         server.add_secure_port(server_address, server_credentials)
         server.start()
         logging.info(f"Service started at {server_address}")
-        consul.register(address=service_conf['host'], port=port, service_name=service_conf['name'],
-                        tags=service_conf['tags'], service_id=service_id)
+        consul.register(
+            address=service_conf["host"],
+            port=port,
+            service_name=service_conf["name"],
+            tags=service_conf["tags"],
+            service_id=service_id,
+        )
         logging.info(f"Service registered with Consul successfully.")
         server.wait_for_termination()
     except KeyboardInterrupt:

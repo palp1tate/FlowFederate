@@ -29,10 +29,12 @@ def get_disk_usage() -> str:
 
 def init_engine():
     conf = config.load_configuration("config.yaml")
-    mysql_conf = conf['mysql']
+    mysql_conf = conf["mysql"]
 
-    DATABASE_URI = (f"mysql+mysqlconnector://{mysql_conf['user']}:{mysql_conf['password']}@"
-                    f"{mysql_conf['host']:{mysql_conf['port']}}/{mysql_conf['database']}")
+    DATABASE_URI = (
+        f"mysql+mysqlconnector://{mysql_conf['user']}:{mysql_conf['password']}@"
+        f"{mysql_conf['host']:{mysql_conf['port']}}/{mysql_conf['database']}"
+    )
 
     engine = create_engine(DATABASE_URI, pool_recycle=3600, future=True)
     return engine

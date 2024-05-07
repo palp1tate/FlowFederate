@@ -2,8 +2,18 @@ import torch
 
 from models.CNNMnist import cnnmnist, LeNet, SimpleCNN
 from models.ResNetv1 import resnet18, resnet34, resnet50, resnet101, resnet152
-from models.ResNetv2 import resnet8, resnet14, resnet20, resnet32, resnet44, resnet56, \
-    resnet110, resnet116, resnet8x4, resnet32x4
+from models.ResNetv2 import (
+    resnet8,
+    resnet14,
+    resnet20,
+    resnet32,
+    resnet44,
+    resnet56,
+    resnet110,
+    resnet116,
+    resnet8x4,
+    resnet32x4,
+)
 
 
 def get_model(name):

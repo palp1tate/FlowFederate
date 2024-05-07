@@ -26,25 +26,32 @@ from util import *
 
 conf = config.load_configuration("config.yaml")
 client_credentials = config.load_client_credentials("../../internal/authorization")
-server_credentials = config.load_server_credentials('../../internal/authorization')
-service_conf = conf['service']
-consul_conf = conf['consul']
-rabbitmq_conf = conf['rabbitmq']
-client_conf = conf['client']
+server_credentials = config.load_server_credentials("../../internal/authorization")
+service_conf = conf["service"]
+consul_conf = conf["consul"]
+rabbitmq_conf = conf["rabbitmq"]
+client_conf = conf["client"]
 
 # Set up basic logging
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 STREAM_PART_SIZE = 2 * 1024 * 1024
 MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024
-options = [('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-           ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH), ('grpc.enable_retries', 1)]
+options = [
+    ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
+    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+    ("grpc.enable_retries", 1),
+]
 COMMON_NAME = "ccc"
 server = None
 service_id = str(uuid.uuid4())
-consul = Consul(consul_host=consul_conf['host'], consul_port=consul_conf['port'])
-rabbitmq = RabbitMQConnection(host=rabbitmq_conf['host'], port=rabbitmq_conf['port'])
+consul = Consul(consul_host=consul_conf["host"], consul_port=consul_conf["port"])
+rabbitmq = RabbitMQConnection(host=rabbitmq_conf["host"], port=rabbitmq_conf["port"])
 rabbitmq_connection = rabbitmq.open_connection()
 engine = init_engine()
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -53,32 +60,59 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 def consume_message(ch, method, properties, body):
     try:
         data = json.loads(body)
-        services = data['services']
-        configuration = data['conf']
-        user_name = data['user_name']
+        services = data["services"]
+        configuration = data["conf"]
+        user_name = data["user_name"]
 
         # 新建训练任务
-        global_epochs = configuration['global_epochs']
-        local_epochs = configuration['local_epochs']
-        model_name = configuration['model_name']
-        dataset_type = configuration['type']
+        global_epochs = configuration["global_epochs"]
+        local_epochs = configuration["local_epochs"]
+        model_name = configuration["model_name"]
+        dataset_type = configuration["type"]
 
         new_session = sessionmaker(engine)
         with new_session() as session:
             created_at = datetime.now()
             updated_at = datetime.now()
-            task = Task(user_name=user_name, created_at=created_at, updated_at=updated_at, model=model_name,
-                        dataset=dataset_type, type="通用模型", status='正常', progress='0%', accuracy=None, loss=None)
+            task = Task(
+                user_name=user_name,
+                created_at=created_at,
+                updated_at=updated_at,
+                model=model_name,
+                dataset=dataset_type,
+                type="通用模型",
+                status="正常",
+                progress="0%",
+                accuracy=None,
+                loss=None,
+            )
             session.add(task)
             session.commit()
             task_id = task.id
-            edge_server = session.query(Server).filter_by(task_id=task_id, server_id=service_id).first()
+            edge_server = (
+                session.query(Server)
+                .filter_by(task_id=task_id, server_id=service_id)
+                .first()
+            )
             if not edge_server:
-                edge_server = Server(task_id=task_id, server_id=service_id, created_at=created_at,
-                                     updated_at=updated_at, model=model_name, dataset=dataset_type,
-                                     type="通用模型", status="正常", current_round=0, total_round=global_epochs,
-                                     accuracy=None, loss=None, cpu=get_cpu_usage(), memory=get_memory_usage(),
-                                     disk=get_disk_usage(), progress="0%")
+                edge_server = Server(
+                    task_id=task_id,
+                    server_id=service_id,
+                    created_at=created_at,
+                    updated_at=updated_at,
+                    model=model_name,
+                    dataset=dataset_type,
+                    type="通用模型",
+                    status="正常",
+                    current_round=0,
+                    total_round=global_epochs,
+                    accuracy=None,
+                    loss=None,
+                    cpu=get_cpu_usage(),
+                    memory=get_memory_usage(),
+                    disk=get_disk_usage(),
+                    progress="0%",
+                )
                 session.add(edge_server)
             session.commit()
         print(f"Task {task_id} created successfully.")
@@ -97,12 +131,21 @@ def consume_message(ch, method, properties, body):
             logging.info(f"Epoch {epoch + 1}/{global_epochs}")
             with ThreadPoolExecutor(max_workers=len(services)) as executor:
                 tasks = [
-                    executor.submit(train_model, address=service, pt=new_pt,
-                                    configuration=json.dumps(configuration), task_id=task_id)
+                    executor.submit(
+                        train_model,
+                        address=service,
+                        pt=new_pt,
+                        configuration=json.dumps(configuration),
+                        task_id=task_id,
+                    )
                     for service in services
                 ]
                 wait(tasks)
-                models = [torch.load(io.BytesIO(task.result())) for task in tasks if task.result() is not None]
+                models = [
+                    torch.load(io.BytesIO(task.result()))
+                    for task in tasks
+                    if task.result() is not None
+                ]
                 modules = []
                 for state_dict in models:
                     model = get_model(model_name)
@@ -122,7 +165,11 @@ def consume_message(ch, method, properties, body):
                         task.updated_at = updated_at
 
                     # 更新边缘服务器状态
-                    edge_server = session.query(Server).filter_by(task_id=task_id, server_id=service_id).first()
+                    edge_server = (
+                        session.query(Server)
+                        .filter_by(task_id=task_id, server_id=service_id)
+                        .first()
+                    )
                     if edge_server:
                         edge_server.updated_at = updated_at
                         edge_server.current_round = epoch + 1
@@ -141,12 +188,16 @@ def consume_message(ch, method, properties, body):
         with new_session() as session:
             task = session.query(Task).get(task_id)
             if task:
-                task.status = '异常'
+                task.status = "异常"
                 task.updated_at = datetime.now()
                 session.commit()
-            edge_server = session.query(Server).filter_by(task_id=task_id, server_id=service_id).first()
+            edge_server = (
+                session.query(Server)
+                .filter_by(task_id=task_id, server_id=service_id)
+                .first()
+            )
             if edge_server:
-                edge_server.status = '异常'
+                edge_server.status = "异常"
                 edge_server.updated_at = datetime.now()
                 session.commit()
             session.commit()
@@ -163,18 +214,26 @@ def send_stream_data(pt: bytes, configuration: str, task_id: int):
         while True:
             chunk = stream.read(STREAM_PART_SIZE)
             if chunk:
-                yield client_pb2.TrainModelRequest(pt=chunk, conf=configuration, size=file_size, task_id=task_id)
+                yield client_pb2.TrainModelRequest(
+                    pt=chunk, conf=configuration, size=file_size, task_id=task_id
+                )
             else:
                 break
 
 
 def train_model(address: str, pt: bytes, configuration: str, task_id: int) -> bytes:
     try:
-        channel_options = options + [('grpc.ssl_target_name_override', COMMON_NAME), ('grpc.keepalive_time_ms', 0)]
+        channel_options = options + [
+            ("grpc.ssl_target_name_override", COMMON_NAME),
+            ("grpc.keepalive_time_ms", 0),
+        ]
         with grpc.intercept_channel(
-                grpc.secure_channel(address, client_credentials, options=channel_options)) as channel:
+            grpc.secure_channel(address, client_credentials, options=channel_options)
+        ) as channel:
             stub = client_pb2_grpc.ClientServiceStub(channel)
-            request = send_stream_data(pt=pt, configuration=configuration, task_id=task_id)
+            request = send_stream_data(
+                pt=pt, configuration=configuration, task_id=task_id
+            )
             data = bytearray()
             for response in stub.TrainModel(request):
                 size = response.size
@@ -187,12 +246,14 @@ def train_model(address: str, pt: bytes, configuration: str, task_id: int) -> by
         raise
 
 
-def aggregate(configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes) -> (bytes, float, float):
+def aggregate(
+    configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
+) -> (bytes, float, float):
     logging.info("Aggregate Function Aggregating models...")
 
     # 加载全局模型的当前状态
     state_dict = torch.load(io.BytesIO(pt))
-    global_model = get_model(configuration['model_name'])
+    global_model = get_model(configuration["model_name"])
     ori_state_dict = global_model.state_dict()
     for key in list(state_dict.keys()):
         if key not in ori_state_dict:
@@ -201,8 +262,8 @@ def aggregate(configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
     logging.info("Global model loaded successfully.")
     global_model.to(device)
 
-    batch_size = configuration['batch_size']
-    dataset_type = configuration['type']
+    batch_size = configuration["batch_size"]
+    dataset_type = configuration["type"]
     _, eval_datasets = get_dataset("./data/", dataset_type)
     logging.info("Dataset loaded successfully.")
     eval_loader = DataLoader(eval_datasets, batch_size=batch_size, shuffle=False)
@@ -210,28 +271,30 @@ def aggregate(configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
 
     # 确定聚合方法
     logging.info(f"Aggregating using {configuration.get('method')} method...")
-    if configuration.get('method') == 'krum':
+    if configuration.get("method") == "krum":
         selected_model = krum_aggregate(modules, len(modules), device)
         global_model.load_state_dict(selected_model)
-    elif configuration.get('method') == 'fedavg':
+    elif configuration.get("method") == "fedavg":
         avg_state_dict = fedavg_aggregate(modules, device)
         global_model.load_state_dict(avg_state_dict)
-    elif configuration.get('method') == 'median':
+    elif configuration.get("method") == "median":
         median_params = median_aggregate(modules, device)
         global_model.load_state_dict(median_params)
-    elif configuration.get('method') == 'pefl':
+    elif configuration.get("method") == "pefl":
         weighted_params = pefl_aggregate(modules, device)
         global_model.load_state_dict(weighted_params)
-    elif configuration.get('method') == 'trimmed_mean':
-        poisoner_nums = configuration.get('poisoner_nums', 0)
+    elif configuration.get("method") == "trimmed_mean":
+        poisoner_nums = configuration.get("poisoner_nums", 0)
         candidates = len(modules)
         logging.info(f"Poisoner nums: {poisoner_nums}, Candidates: {candidates}")
         if candidates - 2 * poisoner_nums > 0:
             trimmed_mean_params = trimmed_mean_aggregate(modules, device, poisoner_nums)
             global_model.load_state_dict(trimmed_mean_params)
         else:
-            logging.error("Not enough candidates after trimming to perform aggregation.")
-    elif configuration.get('method') == 'shieldfl':
+            logging.error(
+                "Not enough candidates after trimming to perform aggregation."
+            )
+    elif configuration.get("method") == "shieldfl":
         aggregated_state_dict = shieldfl_aggregate(modules, global_model, device)
         global_model.load_state_dict(aggregated_state_dict)
     else:
@@ -242,12 +305,14 @@ def aggregate(configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
     # 评估更新后的全局模型
     global_model.eval()
     logging.info("Getting eval loss and accuracy...")
-    loss_function_name = configuration.get('loss_function', 'cross_entropy')  # 默认为交叉熵损失
-    if loss_function_name == 'cross_entropy':
+    loss_function_name = configuration.get(
+        "loss_function", "cross_entropy"
+    )  # 默认为交叉熵损失
+    if loss_function_name == "cross_entropy":
         criterion = torch.nn.CrossEntropyLoss()
-    elif loss_function_name == 'mse':
+    elif loss_function_name == "mse":
         criterion = torch.nn.MSELoss()
-    elif loss_function_name == 'nll':
+    elif loss_function_name == "nll":
         criterion = torch.nn.NLLLoss()
     else:
         raise ValueError(f"Unsupported loss function type: {loss_function_name}")
@@ -266,7 +331,7 @@ def aggregate(configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
 
     avg_loss = total_loss / len(eval_loader)
     accuracy = correct / total
-    print(f'Global Eval Loss: {avg_loss:.4f}, Accuracy: {accuracy:.4f}')
+    print(f"Global Eval Loss: {avg_loss:.4f}, Accuracy: {accuracy:.4f}")
 
     # 保存并返回更新后的全局模型参数
     buf = io.BytesIO()
@@ -281,40 +346,52 @@ class EdgeServicer(edge_pb2_grpc.EdgeServiceServicer):
             conf_json = json.loads(request.conf)
             user_name = request.user_name
             client_num = conf_json["clients"]
-            services = consul.get_services(client_conf['name'], client_num)
+            services = consul.get_services(client_conf["name"], client_num)
             if len(services) < client_num:
-                context.set_details('Not enough available clients.')
+                context.set_details("Not enough available clients.")
                 context.set_code(grpc.StatusCode.UNAVAILABLE)
-                logging.error('Not enough available clients.')
+                logging.error("Not enough available clients.")
                 return empty_pb2.Empty()
 
-            rabbitmq.send_message_to_queue(rabbitmq_connection, services, conf_json, user_name)
+            rabbitmq.send_message_to_queue(
+                rabbitmq_connection, services, conf_json, user_name
+            )
             return empty_pb2.Empty()
         except Exception as ex:
             logging.error(f"Error during training: {ex}")
-            context.set_details(f'An error occurred during model training: {ex}')
+            context.set_details(f"An error occurred during model training: {ex}")
             context.set_code(grpc.StatusCode.INTERNAL)
             return empty_pb2.Empty()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Start the server with specified port")
-    parser.add_argument('-p', '--port', type=int, help='The port to start the server on')
+    parser.add_argument(
+        "-p", "--port", type=int, help="The port to start the server on"
+    )
     args = parser.parse_args()
     port = args.port if args.port else get_free_port()
     try:
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000), options=options)
+        server = grpc.server(
+            futures.ThreadPoolExecutor(max_workers=1000), options=options
+        )
         edge_pb2_grpc.add_EdgeServiceServicer_to_server(EdgeServicer(), server)
         server_address = f"{service_conf['host']}:{port}"
         server.add_secure_port(server_address, server_credentials)
         server.start()
         logging.info(f"Service started at {server_address}")
-        consul.register(address=service_conf['host'], port=port, service_name=service_conf['name'],
-                        tags=service_conf['tags'], service_id=service_id)
+        consul.register(
+            address=service_conf["host"],
+            port=port,
+            service_name=service_conf["name"],
+            tags=service_conf["tags"],
+            service_id=service_id,
+        )
         logging.info(f"Service registered with Consul successfully.")
         for _ in range(5):
-            rabbitmq_consumer_thread = threading.Thread(target=rabbitmq.consume_messages_from_queue,
-                                                        args=(consume_message,))
+            rabbitmq_consumer_thread = threading.Thread(
+                target=rabbitmq.consume_messages_from_queue, args=(consume_message,)
+            )
             rabbitmq_consumer_thread.daemon = True
             rabbitmq_consumer_thread.start()
         server.wait_for_termination()

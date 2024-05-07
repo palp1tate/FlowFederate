@@ -19,7 +19,7 @@ class cnnmnist(nn.Module):
         x3 = F.relu(self.fc1(x2))
         x3 = F.dropout(x3, training=self.training)
         x4 = self.fc(x3)
-        return [x1,x2,x3,x4], x4
+        return [x1, x2, x3, x4], x4
 
 
 class LeNet(nn.Module):
@@ -45,8 +45,6 @@ class LeNet(nn.Module):
         return [x1, x2, x3, x4, x5, x6, x7], x7
 
 
-
-
 class SimpleCNN(nn.Module):
     def __init__(self):
         super(SimpleCNN, self).__init__()
@@ -67,5 +65,3 @@ class SimpleCNN(nn.Module):
         x4 = F.relu(self.fc2(x3))
         x5 = self.fc3(x4)
         return [x1, x2, x3, x4, x5], x5
-
-

@@ -2,8 +2,18 @@ import torch
 
 from models.CNNMnist import cnnmnist, LeNet, SimpleCNN
 from models.ResNetv1 import resnet18, resnet34, resnet50, resnet101, resnet152
-from models.ResNetv2 import resnet8, resnet14, resnet20, resnet32, resnet44, resnet56, \
-    resnet110, resnet116, resnet8x4, resnet32x4
+from models.ResNetv2 import (
+    resnet8,
+    resnet14,
+    resnet20,
+    resnet32,
+    resnet44,
+    resnet56,
+    resnet110,
+    resnet116,
+    resnet8x4,
+    resnet32x4,
+)
 
 
 # 标准 ResNet 架构（适用于 ImageNet 及其他数据集）：
@@ -54,7 +64,6 @@ from models.ResNetv2 import resnet8, resnet14, resnet20, resnet32, resnet44, res
 # 用于cifar100
 
 
-
 def get_model(name):
     if name == "resnet18":
         model = resnet18()
@@ -66,8 +75,6 @@ def get_model(name):
         model = resnet101()
     elif name == "resnet152":
         model = resnet152()
-
-
 
     elif name == "resnet8":
         model = resnet8()
@@ -89,8 +96,6 @@ def get_model(name):
         model = resnet8x4()
     elif name == "resnet32x4":
         model = resnet32x4()
-
-
 
     elif name == "cnnmnist":
         model = cnnmnist()

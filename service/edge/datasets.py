@@ -11,45 +11,71 @@ seed = 42
 
 
 def get_dataset(dir, name):
-    if name == 'mnist':
-        train_dataset = datasets.MNIST(dir, train=True, download=True, transform=transforms.ToTensor())
+    if name == "mnist":
+        train_dataset = datasets.MNIST(
+            dir, train=True, download=True, transform=transforms.ToTensor()
+        )
         eval_dataset = datasets.MNIST(dir, train=False, transform=transforms.ToTensor())
 
-    if name == 'fashionmnist':
-        train_dataset = datasets.FashionMNIST(dir, train=True, download=True, transform=transforms.ToTensor())
-        eval_dataset = datasets.FashionMNIST(dir, train=False, transform=transforms.ToTensor())
+    if name == "fashionmnist":
+        train_dataset = datasets.FashionMNIST(
+            dir, train=True, download=True, transform=transforms.ToTensor()
+        )
+        eval_dataset = datasets.FashionMNIST(
+            dir, train=False, transform=transforms.ToTensor()
+        )
         print("get_fashionmnist")
 
-    elif name == 'cifar10':
-        transform_train = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ])
+    elif name == "cifar10":
+        transform_train = transforms.Compose(
+            [
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+                ),
+            ]
+        )
 
-        transform_test = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ])
+        transform_test = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+                ),
+            ]
+        )
 
-        train_dataset = datasets.CIFAR10(dir, train=True, download=True, transform=transform_train)
+        train_dataset = datasets.CIFAR10(
+            dir, train=True, download=True, transform=transform_train
+        )
         eval_dataset = datasets.CIFAR10(dir, train=False, transform=transform_test)
 
-    elif name == 'cifar100':
-        transform_train = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ])
+    elif name == "cifar100":
+        transform_train = transforms.Compose(
+            [
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+                ),
+            ]
+        )
 
-        transform_test = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ])
+        transform_test = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+                ),
+            ]
+        )
 
-        train_dataset = datasets.CIFAR100(dir, train=True, download=True, transform=transform_train)
+        train_dataset = datasets.CIFAR100(
+            dir, train=True, download=True, transform=transform_train
+        )
         eval_dataset = datasets.CIFAR100(dir, train=False, transform=transform_test)
 
     return train_dataset, eval_dataset
@@ -91,9 +117,9 @@ def dirichlet_split_noniid(train_labels, alpha, n_clients):
     # *将训练集中每个类别的标签索引存储在一个列表中，列表中的第i个元素是一个包含训练集中标签为i的样本索引的NumPy数组。np.argwhere()返回满足条件的元素的索引
     # *np.argwhere(train_labels == y)返回一个形状为(m, 1)的NumPy数组，其中m是训练集中标签为y的样本数量，每个元素是一个标签为y的样本的索引,然后展平为一维数组
 
-    '''
+    """
     例如，如果训练标签中有100个样本，其中有30个属于类别y，那么类别y的样本索引数组就是一个包含30个元素的一维数组，表示这30个样本在训练数据集中的索引位置。
-    '''
+    """
     class_idcs = [np.argwhere(train_labels == y).flatten() for y in range(n_classes)]
     # 记录N个client分别对应的样本索引集合
     # *使用zip(class_idcs, label_distribution)将标签索引和标签分布进行迭代。在每次迭代中，k_idcs表示类别k的样本索引数组，fracs表示标签k在每个客户端上的样本比例。
@@ -105,7 +131,9 @@ def dirichlet_split_noniid(train_labels, alpha, n_clients):
         # *将标签k的样本索引数组按照比例fracs划分为多个子集。这里使用np.cumsum(fracs)[:-1] * len(k_idcs)计算每个划分点的位置，然后使用np.split()函数进行划分。
         # *划分后的每个子集都是一个客户端对应的样本索引数组。
         # *`enumerate()`函数同时获取索引`i`和划分后的子集样本索引数组`idcs`，然后将`idcs`添加到`client_idcs`列表中。
-        for i, idcs in enumerate(np.split(k_idcs, (np.cumsum(fracs)[:-1] * len(k_idcs)).astype(int))):
+        for i, idcs in enumerate(
+            np.split(k_idcs, (np.cumsum(fracs)[:-1] * len(k_idcs)).astype(int))
+        ):
             # *每个客户端对应的样本索引数组添加到client_idcs列表中。
             client_idcs[i] += [idcs]
     # *将每个客户端的样本索引数组连接起来，得到一个包含每个客户端样本索引的列表
@@ -118,7 +146,7 @@ def dirichlet_split_noniid(train_labels, alpha, n_clients):
     # *每个客户端的样本索引数组存储到一个字典client_idx中，其中键是客户端的编号，值是客户端对应的样本索引数组。
     client_idx = {}
     for i in range(len(client_idcs)):
-        client_idx[i+1] = client_idcs[i]
+        client_idx[i + 1] = client_idcs[i]
     return client_idx
 
 
@@ -139,14 +167,19 @@ def dirichlet_nonIID_data(train_data, conf):
 
     # 我们让每个client不同label的样本数量不同，以此做到Non-IID划分
     # client_idcs = dirichlet_split_noniid(labels, alpha=conf["dirichlet_alpha"], n_clients=conf["clients"])
-    return dirichlet_split_noniid(labels, alpha=conf["dirichlet_alpha"], n_clients=conf["clients"])
+    return dirichlet_split_noniid(
+        labels, alpha=conf["dirichlet_alpha"], n_clients=conf["clients"]
+    )
 
     # 展示不同label划分到不同client的情况
     fig = plt.figure(figsize=(8, 7))
-    plt.hist([labels[idc] for idc in client_idcs], stacked=True,
-             bins=np.arange(min(labels) - 0.5, max(labels) + 1.5, 1),
-             label=["Terminal {}".format(i) for i in range(conf["clients"])],
-             rwidth=0.8)
+    plt.hist(
+        [labels[idc] for idc in client_idcs],
+        stacked=True,
+        bins=np.arange(min(labels) - 0.5, max(labels) + 1.5, 1),
+        label=["Terminal {}".format(i) for i in range(conf["clients"])],
+        rwidth=0.8,
+    )
     # plt.xticks(np.arange(n_classes), fontsize=20)
     plt.xticks(np.array([0, 9, 19, 29, 39, 49, 59, 69, 79, 89, 99]), fontsize=20)
     plt.xlabel("Label type", fontsize=20)
@@ -155,12 +188,12 @@ def dirichlet_nonIID_data(train_data, conf):
     plt.title("CIFAR100", fontsize=20)
     plt.show()
 
-    filename = 'Lai-CIFAR100.pdf'
-    fig.savefig('../result/' + filename, bbox_inches='tight')
+    filename = "Lai-CIFAR100.pdf"
+    fig.savefig("../result/" + filename, bbox_inches="tight")
 
 
 if __name__ == "__main__":
-    with open("../utils/conf.json", 'r') as f:
+    with open("../utils/conf.json", "r") as f:
         conf = json.load(f)
 
     train_datasets, eval_datasets = get_dataset("../data/", "cifar100")
