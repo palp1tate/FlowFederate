@@ -55,3 +55,20 @@ jobs:
         run: pip install black
       - name: Check Python files with Black
         run: black --check . --exclude ".*pb2.*\.py"
+
+  install-dependencies:
+    name: Install Python Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
