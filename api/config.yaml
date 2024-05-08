@@ -1,6 +1,6 @@
 api:
   name: FlowFederate-Api
-  host: 113.54.234.76
+  host: 10.252.67.252
   tags:
     - api
     - FlowFederate

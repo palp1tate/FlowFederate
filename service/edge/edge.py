@@ -188,7 +188,7 @@ def consume_message(ch, method, properties, body):
         logging.error(f"Failed to process message: {ex}")
         new_session = sessionmaker(engine)
         with new_session() as session:
-            task = session.query(Task).get(task_id)
+            task = session.get(Task, task_id)
             if task:
                 task.status = "异常"
                 task.updated_at = datetime.now()
