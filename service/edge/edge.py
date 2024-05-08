@@ -163,6 +163,7 @@ def consume_message(ch, method, properties, body):
                         task.loss = loss
                         task.progress = progress
                         task.updated_at = updated_at
+                        task.status = "正常"
 
                     # 更新边缘服务器状态
                     edge_server = (
@@ -179,9 +180,10 @@ def consume_message(ch, method, properties, body):
                         edge_server.memory = get_memory_usage()
                         edge_server.disk = get_disk_usage()
                         edge_server.progress = progress
+                        edge_server.status = "正常"
                     session.commit()
 
-        # ch.basic_ack(delivery_tag=method.delivery_tag)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
     except Exception as ex:
         logging.error(f"Failed to process message: {ex}")
         new_session = sessionmaker(engine)
@@ -202,7 +204,7 @@ def consume_message(ch, method, properties, body):
                 session.commit()
             session.commit()
         # 处理失败，拒绝消息并决定是否重新投递
-        # ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
     finally:
         executor.shutdown(wait=True)
 

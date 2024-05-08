@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 	"strconv"
-	"time"
 
+	"github.com/palp1tate/FlowFederate/api/types"
 	"github.com/palp1tate/FlowFederate/internal/model"
 
 	"github.com/palp1tate/FlowFederate/api/dao"
@@ -33,85 +33,26 @@ func Train(c *gin.Context) {
 	HandleHttpResponse(c, http.StatusOK, errorx.Success, nil)
 }
 
-func tasksEqual(a, b []*model.Task) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if *a[i] != *b[i] {
-			return false
-		}
-	}
-	return true
-}
-
 func GetTaskList(c *gin.Context) {
 	u := c.Query("u")
 	if u == "" {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrParamsInvalid, nil)
 		return
 	}
-	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	tasks, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindTaskList(u, 1, 10)
 	if err != nil {
-		HandleHttpResponse(c, http.StatusInternalServerError, errorx.ErrInternalServer, nil)
+		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetTaskList, nil)
 		return
 	}
-	defer ws.Close()
-
-	var taskList []*model.Task
-	done := make(chan struct{})
-
-	go func() {
-		defer close(done)
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				tasks, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindTaskList(u, 1, 10)
-				if err != nil {
-					return
-				}
-
-				if !tasksEqual(taskList, tasks) {
-					// 更新用户的任务列表
-					taskList = cloneTasks(tasks)
-
-					// 返回新的任务列表给前端
-					if err := ws.WriteJSON(gin.H{
-						"code": errorx.Success,
-						"msg":  errorx.GetMsg(errorx.Success),
-						"data": gin.H{
-							"tasks":      tasks,
-							"pages":      pages,
-							"totalCount": totalCount,
-						},
-					}); err != nil {
-						return
-					}
-				}
-			case <-done:
-				return
-			}
-		}
-	}()
-
-	for {
-		_, _, err := ws.ReadMessage()
-		if err != nil {
-			done <- struct{}{}
-			break
-		}
-	}
-}
-
-func cloneTasks(tasks []*model.Task) []*model.Task {
-	cloned := make([]*model.Task, len(tasks))
+	taskList := make([]types.TaskWithFormattedTime, len(tasks))
 	for i, task := range tasks {
-		taskCopy := *task
-		cloned[i] = &taskCopy
+		taskList[i] = FormatTaskTime(task)
 	}
-	return cloned
+	HandleHttpResponse(c, http.StatusOK, errorx.Success, gin.H{
+		"tasks":      taskList,
+		"pages":      pages,
+		"totalCount": totalCount,
+	})
 }
 
 func GetTask(c *gin.Context) {
@@ -126,5 +67,105 @@ func GetTask(c *gin.Context) {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetTask, nil)
 		return
 	}
-	HandleHttpResponse(c, http.StatusOK, errorx.Success, task)
+	HandleHttpResponse(c, http.StatusOK, errorx.Success, FormatTaskTime(task))
+}
+
+func GetServerProgress(c *gin.Context) {
+	tid := c.Query("tid")
+	if tid == "" {
+		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrParamsInvalid, nil)
+		return
+	}
+	id, _ := strconv.Atoi(tid)
+	servers, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindServerList(id, 1, 10)
+	if err != nil {
+		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetServerList, nil)
+		return
+	}
+	serverList := make([]types.ServerWithFormattedTime, len(servers))
+	for i, server := range servers {
+		serverList[i] = FormatServerTime(server)
+	}
+	HandleHttpResponse(c, http.StatusOK, errorx.Success, gin.H{
+		"servers":    serverList,
+		"pages":      pages,
+		"totalCount": totalCount,
+	})
+}
+
+func GetClientProgress(c *gin.Context) {
+	tid := c.Query("tid")
+	if tid == "" {
+		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrParamsInvalid, nil)
+		return
+	}
+	id, _ := strconv.Atoi(tid)
+	clients, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindClientList(id, 1, 10)
+	if err != nil {
+		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetClientList, nil)
+		return
+	}
+	clientList := make([]types.ClientWithFormattedTime, len(clients))
+	for i, client := range clients {
+		clientList[i] = FormatClientTime(client)
+	}
+	HandleHttpResponse(c, http.StatusOK, errorx.Success, gin.H{
+		"clients":    clientList,
+		"pages":      pages,
+		"totalCount": totalCount,
+	})
+}
+
+func FormatTaskTime(t *model.Task) types.TaskWithFormattedTime {
+	return types.TaskWithFormattedTime{
+		ID:        t.ID,
+		UserName:  t.UserName,
+		CreatedAt: t.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: t.UpdatedAt.Format("2006-01-02 15:04:05"),
+		Model:     t.Model,
+		Dataset:   t.Dataset,
+		Type:      t.Type,
+		Status:    t.Status,
+		Progress:  t.Progress,
+		Accuracy:  t.Accuracy,
+		Loss:      t.Loss,
+	}
+}
+
+func FormatServerTime(s *model.Server) types.ServerWithFormattedTime {
+	return types.ServerWithFormattedTime{
+		ServerID:  s.ServerID,
+		TaskID:    s.TaskID,
+		CreatedAt: s.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: s.UpdatedAt.Format("2006-01-02 15:04:05"),
+		Model:     s.Model,
+		Dataset:   s.Dataset,
+		Type:      s.Type,
+		Status:    s.Status,
+		Progress:  s.Progress,
+		Accuracy:  s.Accuracy,
+		Loss:      s.Loss,
+		Cpu:       s.Cpu,
+		Memory:    s.Memory,
+		Disk:      s.Disk,
+	}
+}
+
+func FormatClientTime(c *model.Client) types.ClientWithFormattedTime {
+	return types.ClientWithFormattedTime{
+		ClientID:  c.ClientID,
+		TaskID:    c.TaskID,
+		CreatedAt: c.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: c.UpdatedAt.Format("2006-01-02 15:04:05"),
+		Model:     c.Model,
+		Dataset:   c.Dataset,
+		Type:      c.Type,
+		Status:    c.Status,
+		Progress:  c.Progress,
+		Accuracy:  c.Accuracy,
+		Loss:      c.Loss,
+		Cpu:       c.Cpu,
+		Memory:    c.Memory,
+		Disk:      c.Disk,
+	}
 }

@@ -43,7 +43,7 @@ class RabbitMQConnection:
         try:
             channel.queue_declare(queue="train_queue")
             channel.basic_consume(
-                queue="train_queue", on_message_callback=callback, auto_ack=True
+                queue="train_queue", on_message_callback=callback, auto_ack=False
             )
             channel.start_consuming()
         finally:

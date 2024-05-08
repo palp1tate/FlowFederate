@@ -8,4 +8,6 @@ const (
 	ErrGetTaskList    = 10002
 	ErrGetTask        = 10003
 	ErrInternalServer = 10004
+	ErrGetServerList  = 10005
+	ErrGetClientList  = 10006
 )

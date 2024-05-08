@@ -12,5 +12,7 @@ func InitTrainRouter(Router *gin.RouterGroup) {
 		TrainRouter.POST("/start", handler.Train)
 		TrainRouter.GET("/list", handler.GetTaskList)
 		TrainRouter.GET("/detail", handler.GetTask)
+		TrainRouter.GET("/server", handler.GetServerProgress)
+		TrainRouter.GET("/client", handler.GetClientProgress)
 	}
 }

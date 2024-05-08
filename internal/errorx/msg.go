@@ -7,6 +7,8 @@ const (
 	ErrorGetTaskListMsg    = "获取任务列表失败!"
 	ErrorGetTaskMsg        = "获取任务失败!"
 	ErrorInternalServerMsg = "内部服务器错误!"
+	ErrorGetServerListMsg  = "获取边缘服务器列表失败!"
+	ErrorGetClientListMsg  = "获取客户端列表失败!"
 )
 
 var MsgFlags = map[int]string{
@@ -16,6 +18,8 @@ var MsgFlags = map[int]string{
 	ErrGetTaskList:    ErrorGetTaskListMsg,
 	ErrGetTask:        ErrorGetTaskMsg,
 	ErrInternalServer: ErrorInternalServerMsg,
+	ErrGetServerList:  ErrorGetServerListMsg,
+	ErrGetClientList:  ErrorGetClientListMsg,
 }
 
 func GetMsg(code int) string {

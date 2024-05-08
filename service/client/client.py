@@ -183,6 +183,7 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
                     client.memory = get_memory_usage()
                     client.disk = get_disk_usage()
                     client.progress = f"{(epoch + 1) * 100 // local_epochs}%"
+                    client.status = "正常"
                     session.commit()
 
         trained_model = local_model.state_dict()

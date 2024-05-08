@@ -1,6 +1,6 @@
 service:
   name: ClientService
-  host: 10.252.75.142
+  host: 113.54.234.76
   tags:
     - client
     - FlowFederate
