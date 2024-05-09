@@ -16,7 +16,7 @@ mysql:
   host: 127.0.0.1
   port: 3306
   database: FlowFederate
-  user: wxy
+  user: FlowFederate
   password: 123456
 
 debug: true
