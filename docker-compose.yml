@@ -32,6 +32,7 @@ services:
       - "5672:5672"
 
   api:
+    image: flow-federate-api:latest
     build:
       context: .
       dockerfile: ./api/Dockerfile

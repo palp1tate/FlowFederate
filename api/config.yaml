@@ -1,6 +1,6 @@
 api:
   name: FlowFederate-Api
-  host: 10.252.67.252
+  host: 10.0.12.5
   tags:
     - api
     - FlowFederate
@@ -9,11 +9,11 @@ service:
   edge: EdgeService
 
 consul:
-  host: 127.0.0.1
+  host: consul
   port: 8500
 
 mysql:
-  host: 127.0.0.1
+  host: mysql
   port: 3306
   database: FlowFederate
   user: FlowFederate
