@@ -44,6 +44,7 @@ services:
       - rabbitmq
     volumes:
       - ./service/edge/config.yaml:/app/service/edge/config.yaml
+      - ./internal/authorization:/app/internal/authorization
     command: [ "./service/edge/run.sh", "-p", "5000" ]
 
   client:
@@ -58,6 +59,7 @@ services:
       - mysql
     volumes:
       - ./service/client/config.yaml:/app/service/client/config.yaml
+      - ./internal/authorization:/app/internal/authorization
     command: [ "./service/client/run.sh", "-p", "5001" ]
 
   api:
@@ -73,4 +75,5 @@ services:
       - edge
     volumes:
       - ./api/config.yaml:/app/api/config.yaml
+      - ./internal/authorization:/app/internal/authorization
     command: [ "./run.sh", "-p", "9090" ]
