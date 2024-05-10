@@ -1,6 +1,5 @@
 api:
   name: FlowFederate-Api
-  host: ip
   tags:
     - api
     - FlowFederate

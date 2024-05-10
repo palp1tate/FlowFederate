@@ -2,7 +2,6 @@ package config
 
 type ApiConfig struct {
 	Name string   `mapstructure:"name"`
-	Host string   `mapstructure:"host"`
 	Tags []string `mapstructure:"tags"`
 }
 type ServiceConfig struct {

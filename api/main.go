@@ -29,7 +29,7 @@ func main() {
 	}
 	initialize.InitServiceConn()
 
-	host := global.ServerConfig.Api.Host
+	host := util.GetIPAddress()
 	port := flag.Int("p", 0, "port number")
 	flag.Parse()
 	if *port == 0 {
@@ -55,7 +55,7 @@ func main() {
 		zap.S().Panic(err)
 	}
 
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
