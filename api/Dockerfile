@@ -19,6 +19,10 @@ RUN go build -o main ./api/main.go
 # 使用 ubuntu:22.04 作为最终阶段的基础镜像
 FROM ubuntu:22.04
 
+# 替换默认Ubuntu源为中国科学技术大学的源
+RUN sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+
 # 更新 apt-get， 并安装 netcat
 RUN apt-get update && apt-get install -y netcat
 
