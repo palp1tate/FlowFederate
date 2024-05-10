@@ -1,3 +1,4 @@
+import os
 import socket
 
 import psutil
@@ -10,6 +11,26 @@ def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("", 0))
         return s.getsockname()[1]
+
+
+def get_ip_address():
+    # 检测操作系统
+    if os.name == "nt":  # Linux 或 macOS
+        # 获取本机电脑名
+        hostname = socket.gethostname()
+        # 获取本机ip
+        ip_address = socket.gethostbyname(hostname)
+        return ip_address
+    elif os.name == "posix":  # Linux
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                s.connect(("8.8.8.8", 80))
+                ip_address = s.getsockname()[0]
+                return ip_address
+        except Exception:
+            return "127.0.0.1"
+    else:
+        return "Unsupported OS"
 
 
 def get_cpu_usage() -> str:
@@ -28,7 +49,7 @@ def get_disk_usage() -> str:
 
 
 def init_engine():
-    conf = config.load_configuration("config.yaml")
+    conf = config.load_configuration("service/edge/config.yaml")
     mysql_conf = conf["mysql"]
 
     DATABASE_URI = (

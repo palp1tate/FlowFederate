@@ -1,24 +1,23 @@
 service:
   name: EdgeService
-  host: 10.252.67.252
   tags:
     - edge
     - FlowFederate
     - service
 
 consul:
-  host: 127.0.0.1
+  host: consul
   port: 8500
 
 rabbitmq:
-  host: 127.0.0.1
+  host: rabbitmq
   port: 5672
 
 mysql:
-  host: 127.0.0.1
+  host: mysql
   port: 3306
   database: FlowFederate
-  user: wxy
+  user: FlowFederate
   password: 123456
 
 client:

@@ -19,9 +19,9 @@ from get_model import get_model
 from internal.model.table import Client
 from util import *
 
-conf = config.load_configuration("config.yaml")
-client_credentials = config.load_client_credentials("../../internal/authorization")
-server_credentials = config.load_server_credentials("../../internal/authorization")
+conf = config.load_configuration("service/client/config.yaml")
+client_credentials = config.load_client_credentials("internal/authorization")
+server_credentials = config.load_server_credentials("internal/authorization")
 service_conf = conf["service"]
 consul_conf = conf["consul"]
 
@@ -73,8 +73,6 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
                     status="正常",
                     current_round=0,
                     total_round=local_epochs,
-                    accuracy=None,
-                    loss=None,
                     cpu=get_cpu_usage(),
                     memory=get_memory_usage(),
                     disk=get_disk_usage(),
@@ -257,12 +255,13 @@ if __name__ == "__main__":
             futures.ThreadPoolExecutor(max_workers=1000), options=options
         )
         client_pb2_grpc.add_ClientServiceServicer_to_server(ClientServicer(), server)
-        server_address = f"{service_conf['host']}:{port}"
+        server_address = f"[::]:{port}"
         server.add_secure_port(server_address, server_credentials)
+        server_host = get_ip_address()
         server.start()
-        logging.info(f"Service started at {server_address}")
+        logging.info(f"Service started at {server_host}:{port}")
         consul.register(
-            address=service_conf["host"],
+            address=server_host,
             port=port,
             service_name=service_conf["name"],
             tags=service_conf["tags"],

@@ -1,20 +1,19 @@
 service:
   name: ClientService
-  host: 10.252.67.252
   tags:
     - client
     - FlowFederate
     - service
 
 consul:
-  host: 127.0.0.1
+  host: consul
   port: 8500
 
 mysql:
-  host: 127.0.0.1
+  host: mysql
   port: 3306
   database: FlowFederate
-  user: wxy
+  user: FlowFederate
   password: 123456
 
 debug: true
