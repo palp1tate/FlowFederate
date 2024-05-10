@@ -35,7 +35,7 @@ services:
     image: flow-federate-sc:latest
     build:
       context: .
-      dockerfile: ./service/edge/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     depends_on:
@@ -44,12 +44,13 @@ services:
       - rabbitmq
     volumes:
       - ./service/edge/config.yaml:/app/service/edge/config.yaml
+    command: [ "./service/edge/run.sh", "-p", "5000" ]
 
   client:
     image: flow-federate-sc:latest
     build:
       context: .
-      dockerfile: ./service/client/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "5001:5001"
     depends_on:
@@ -57,6 +58,7 @@ services:
       - mysql
     volumes:
       - ./service/client/config.yaml:/app/service/client/config.yaml
+    command: [ "./service/client/run.sh", "-p", "5001" ]
 
   api:
     image: flow-federate-api:latest
@@ -71,3 +73,4 @@ services:
       - edge
     volumes:
       - ./api/config.yaml:/app/api/config.yaml
+    command: [ "./run.sh", "-p", "9090" ]

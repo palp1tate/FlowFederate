@@ -26,6 +26,3 @@ RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua
 
 # 给 run.sh 设置为可执行权限
 RUN chmod +x ./service/edge/run.sh ./service/client/run.sh
-
-# 当容器启动时运行 run.sh
-CMD ["./service/client/run.sh","-p","5001"]
