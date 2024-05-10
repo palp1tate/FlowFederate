@@ -39,7 +39,7 @@ options = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
     ("grpc.enable_retries", 1),
 ]
-COMMON_NAME = "ccc"
+COMMON_NAME = conf["common_name"]
 server = None
 service_id = str(uuid.uuid4())
 consul = Consul(consul_host=consul_conf["host"], consul_port=consul_conf["port"])

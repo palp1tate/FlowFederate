@@ -23,4 +23,4 @@ mysql:
 client:
   name: ClientService
 
-debug: true
+common_name: FlowFederate

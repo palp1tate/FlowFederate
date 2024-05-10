@@ -22,9 +22,10 @@ type MySQLConfig struct {
 }
 
 type ServerConfig struct {
-	Api     ApiConfig     `mapstructure:"api"`
-	Service ServiceConfig `mapstructure:"service"`
-	MySQL   MySQLConfig   `mapstructure:"mysql"`
-	Consul  ConsulConfig  `mapstructure:"consul"`
-	Debug   bool          `mapstructure:"debug"`
+	Api        ApiConfig     `mapstructure:"api"`
+	Service    ServiceConfig `mapstructure:"service"`
+	MySQL      MySQLConfig   `mapstructure:"mysql"`
+	Consul     ConsulConfig  `mapstructure:"consul"`
+	CommonName string        `mapstructure:"common_name"`
+	Debug      bool          `mapstructure:"debug"`
 }

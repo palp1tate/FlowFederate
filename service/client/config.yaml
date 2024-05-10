@@ -16,4 +16,4 @@ mysql:
   user: FlowFederate
   password: 123456
 
-debug: true
+common_name: FlowFederate
