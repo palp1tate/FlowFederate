@@ -32,7 +32,7 @@ services:
       - "5672:5672"
 
   edge:
-    image: flow-federate-edge:latest
+    image: flow-federate-sc:latest
     build:
       context: .
       dockerfile: ./service/edge/Dockerfile
@@ -44,11 +44,9 @@ services:
       - rabbitmq
     volumes:
       - ./service/edge/config.yaml:/app/service/edge/config.yaml
-    environment:
-      - GRPC_VERBOSITY=debug
 
   client:
-    image: flow-federate-client:latest
+    image: flow-federate-sc:latest
     build:
       context: .
       dockerfile: ./service/client/Dockerfile

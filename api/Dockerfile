@@ -34,8 +34,5 @@ COPY --from=builder /app/internal ./internal/
 # 给 run.sh 和 main 设置为可执行权限
 RUN chmod +x ./run.sh ./main
 
-# 暴露 9090 端口
-EXPOSE 9090
-
 # 当容器启动时运行 run.sh
 CMD ["./run.sh", "-p", "9090"]
