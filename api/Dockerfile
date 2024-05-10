@@ -38,4 +38,4 @@ RUN chmod +x ./run.sh ./main
 EXPOSE 9090
 
 # 当容器启动时运行 run.sh
-CMD ["./run.sh"]
+CMD ["./run.sh", "-p", "9090"]

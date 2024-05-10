@@ -17,5 +17,4 @@ done
 echo "Consul is up..."
 
 # 执行 main 程序
-./main -p 9090
-
+./main "$1" "$2"
