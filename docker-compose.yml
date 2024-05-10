@@ -31,6 +31,35 @@ services:
       - "15672:15672"
       - "5672:5672"
 
+  edge:
+    image: flow-federate-edge:latest
+    build:
+      context: .
+      dockerfile: ./service/edge/Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - consul
+      - mysql
+      - rabbitmq
+    volumes:
+      - ./service/edge/config.yaml:/app/service/edge/config.yaml
+    environment:
+      - GRPC_VERBOSITY=debug
+
+  client:
+    image: flow-federate-client:latest
+    build:
+      context: .
+      dockerfile: ./service/client/Dockerfile
+    ports:
+      - "5001:5001"
+    depends_on:
+      - consul
+      - mysql
+    volumes:
+      - ./service/client/config.yaml:/app/service/client/config.yaml
+
   api:
     image: flow-federate-api:latest
     build:
@@ -41,5 +70,6 @@ services:
     depends_on:
       - consul
       - mysql
+      - edge
     volumes:
       - ./api/config.yaml:/app/api/config.yaml
