@@ -262,7 +262,7 @@ def aggregate(
 
     batch_size = configuration["batch_size"]
     dataset_type = configuration["type"]
-    _, eval_datasets = get_dataset("./data/", dataset_type)
+    _, eval_datasets = get_dataset("service/client/data", dataset_type)
     logging.info("Dataset loaded successfully.")
     eval_loader = DataLoader(eval_datasets, batch_size=batch_size, shuffle=False)
     logging.info("Dataloader loaded successfully.")

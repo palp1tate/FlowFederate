@@ -95,7 +95,7 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         local_model = local_model.to(device)
 
-        train_datasets, eval_datasets = get_dataset("./data/", dataset_type)
+        train_datasets, eval_datasets = get_dataset("service/client/data", dataset_type)
         train_loader = DataLoader(train_datasets, batch_size=batch_size, shuffle=True)
         eval_loader = DataLoader(eval_datasets, batch_size=batch_size, shuffle=False)
 
