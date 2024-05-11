@@ -1,4 +1,3 @@
----
 name: CI/CD
 on:
   push:
@@ -109,20 +108,12 @@ jobs:
       - name: Decide Should_Push Or Not
         id: should_push
         run: |
-          old_array=(${old_version//\./ })
-          new_array=(${new_version//\./ })
-          if [ ${old_array[0]} != ${new_array[0]} ]
-          then
-              echo "should_push=true" >> $GITHUB_ENV
-          elif [ ${old_array[1]} != ${new_array[1]} ]
+          if [ "$old_version" != "$new_version" ]
           then
               echo "should_push=true" >> $GITHUB_ENV
           else
               echo "should_push=false" >> $GITHUB_ENV
           fi
-      - name: Print should_push
-        run: |
-          echo "Should push: ${{ env.should_push }}"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3.0.0
       - name: Set up QEMU
