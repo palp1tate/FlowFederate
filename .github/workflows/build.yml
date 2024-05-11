@@ -37,7 +37,7 @@ jobs:
         run: |
           go install mvdan.cc/gofumpt@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          find . -name '*.go' -exec gofumpt -l -w {} +
+          find . -name '*.go' | grep -v pb | xargs gofumpt -l -w
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6.0.1
         with:

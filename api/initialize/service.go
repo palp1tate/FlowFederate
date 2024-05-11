@@ -2,11 +2,13 @@ package initialize
 
 import (
 	"fmt"
+
 	_ "github.com/mbobakov/grpc-consul-resolver"
 	"github.com/palp1tate/FlowFederate/api/global"
 	"github.com/palp1tate/FlowFederate/internal/consts"
 	"github.com/palp1tate/FlowFederate/internal/util"
 	"github.com/palp1tate/FlowFederate/service/edge/pb"
+
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
