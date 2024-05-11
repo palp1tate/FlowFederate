@@ -1,12 +1,12 @@
 # 使用 python:3.10-slim 作为基础镜像
 FROM python:3.10-slim
 
-# 设置镜像源为中科大
-RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list && \
-    sed -i 's/security.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+# 创建或覆盖 sources.list 文件，使用中科大的镜像源
+RUN echo "deb http://mirrors.ustc.edu.cn/debian/ bullseye main contrib non-free" > /etc/apt/sources.list && \
+    echo "deb http://mirrors.ustc.edu.cn/debian-security/ bullseye-security main contrib non-free" >> /etc/apt/sources.list
 
 # 更新系统并安装必要的系统依赖
-RUN apt-get update && apt-get install -y netcat && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 # 设置工作目录为/app
 WORKDIR /app
