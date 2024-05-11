@@ -1,34 +1,41 @@
+---
 name: CI/CD
-
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
-
+    branches:
+      - master
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4.1.4
       - name: Set up Go 1.x
         uses: actions/setup-go@v5.0.1
         with:
           go-version: ^1.20
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v4.1.4
+      - name: Get dependencies
+        run: go mod download
+      - name: Cache Go modules
+        uses: actions/cache@v4.0.2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Run gofumpt
         run: |
           go install mvdan.cc/gofumpt@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
           find . -name '*.go' -exec gofumpt -l -w {} +
-      - name: Get dependencies
-        run: go mod download
       - name: Build
         run: go build -v ./...
       - name: Test
         run: go test -v ./...
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -40,7 +47,6 @@ jobs:
         with:
           version: latest
           args: --issues-exit-code=0 --timeout=5m
-
   black-check:
     name: Black Check
     runs-on: ubuntu-latest
@@ -50,12 +56,11 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v5.1.0
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - name: Install Black
         run: pip install black
       - name: Check Python files with Black
         run: black --check . --exclude ".*pb2.*\.py"
-
   install-dependencies:
     name: Install Python Dependencies
     runs-on: ubuntu-latest
@@ -65,43 +70,41 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v5.1.0
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
-
   release-and-push:
     name: Release and Push
     runs-on: ubuntu-latest
-    needs: [ build, lint, black-check, install-dependencies ]
+    needs:
+      - build
+      - lint
+      - black-check
+      - install-dependencies
     if: github.repository == 'palp1tate/FlowFederate' && github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.4
         with:
           fetch-depth: -1
-
       - name: Setup Node.js
         uses: actions/setup-node@v4.0.2
         with:
           node-version: 20
-
       - name: Fetch Previous version
         id: get-previous-tag
         uses: actions-ecosystem/action-get-latest-tag@v1.6.0
-
       - name: Release
         run: yarn global add semantic-release@23.1.1 && semantic-release
         env:
           GH_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-
       - name: Fetch Current version
         id: get-current-tag
         uses: actions-ecosystem/action-get-latest-tag@v1.6.0
-
       - name: Decide Should_Push Or Not
         id: should_push
         run: |
@@ -118,23 +121,19 @@ jobs:
           else
               echo "should_push=false" >> $GITHUB_ENV
           fi
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3.0.0
-
       - name: Set up buildx
         id: buildx
         uses: docker/setup-buildx-action@v3.3.0
         with:
           version: latest
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3.1.0
         if: env.should_push == 'true'
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Build and Push flow-federate-sc Image
         uses: docker/build-push-action@v5.3.0
         if: env.should_push == 'true'
@@ -142,9 +141,9 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: palp1tate/flow-federate-sc:${{ steps.get-current-tag.outputs.tag }}, palp1tate/flow-federate-sc:latest
+          tags: palp1tate/flow-federate-sc:${{ steps.get-current-tag.outputs.tag }},
+            palp1tate/flow-federate-sc:latest
           platforms: linux/amd64
-
       - name: Build and Push flow-federate-api Image
         uses: docker/build-push-action@v5.3.0
         if: env.should_push == 'true'
@@ -152,5 +151,6 @@ jobs:
           context: .
           file: ./api/Dockerfile
           push: true
-          tags: palp1tate/flow-federate-api:${{ steps.get-current-tag.outputs.tag }}, palp1tate/flow-federate-api:latest
+          tags: palp1tate/flow-federate-api:${{ steps.get-current-tag.outputs.tag }},
+            palp1tate/flow-federate-api:latest
           platforms: linux/amd64
