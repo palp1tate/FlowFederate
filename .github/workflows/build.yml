@@ -142,7 +142,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/flow-federate-sc:${{ steps.get-current-tag.outputs.tag }}, ${{ secrets.DOCKER_USERNAME }}/flow-federate-sc:latest
+          tags: palp1tate/flow-federate-sc:${{ steps.get-current-tag.outputs.tag }}, palp1tate/flow-federate-sc:latest
           platforms: linux/amd64
 
       - name: Build and Push flow-federate-api Image
@@ -152,5 +152,5 @@ jobs:
           context: .
           file: ./api/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/flow-federate-api:${{ steps.get-current-tag.outputs.tag }}, ${{ secrets.DOCKER_USERNAME }}/flow-federate-api:latest
+          tags: palp1tate/flow-federate-api:${{ steps.get-current-tag.outputs.tag }}, palp1tate/flow-federate-api:latest
           platforms: linux/amd64
