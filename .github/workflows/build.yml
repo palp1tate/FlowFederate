@@ -120,6 +120,11 @@ jobs:
           else
               echo "should_push=false" >> $GITHUB_ENV
           fi
+      - name: Print should_push
+        run: |
+          echo "Should push: ${{ env.should_push }}"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.0.0
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3.0.0
       - name: Set up buildx
