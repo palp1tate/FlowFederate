@@ -102,11 +102,13 @@ jobs:
       - name: Fetch Current version
         id: get-current-tag
         uses: actions-ecosystem/action-get-latest-tag@v1.6.0
+      - name: Set version tags as environment variables
+        run: |
+          echo "old_version=${{ steps.get-previous-tag.outputs.tag }}" >> $GITHUB_ENV
+          echo "new_version=${{ steps.get-current-tag.outputs.tag }}" >> $GITHUB_ENV
       - name: Decide Should_Push Or Not
         id: should_push
         run: |
-          old_version=${{steps.get-previous-tag.outputs.tag}}
-          new_version=${{steps.get-current-tag.outputs.tag}}
           old_array=(${old_version//\./ })
           new_array=(${new_version//\./ })
           if [ ${old_array[0]} != ${new_array[0]} ]
@@ -138,7 +140,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: palp1tate/flow-federate-sc:${{ steps.get-current-tag.outputs.tag }},
+          tags: palp1tate/flow-federate-sc:${{ env.new_version }},
             palp1tate/flow-federate-sc:latest
           platforms: linux/amd64
       - name: Build and Push flow-federate-api Image
@@ -148,6 +150,6 @@ jobs:
           context: .
           file: ./api/Dockerfile
           push: true
-          tags: palp1tate/flow-federate-api:${{ steps.get-current-tag.outputs.tag }},
+          tags: palp1tate/flow-federate-api:${{ env.new_version }},
             palp1tate/flow-federate-api:latest
           platforms: linux/amd64
