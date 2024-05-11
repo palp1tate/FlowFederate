@@ -37,6 +37,12 @@ services:
       context: .
       dockerfile: Dockerfile
 
+  flow-federate-api:
+    image: flow-federate-api:latest
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+
   client-1:
     image: flow-federate-sc:latest
     ports:
@@ -78,9 +84,6 @@ services:
 
   api:
     image: flow-federate-api:latest
-    build:
-      context: .
-      dockerfile: ./api/Dockerfile
     ports:
       - "9090:9090"
     depends_on:
