@@ -2,9 +2,9 @@ package util
 
 import "strconv"
 
-func ParsePageAndPageSize(page, pageSize string) (p, pSize int) {
-	p, _ = strconv.Atoi(page)
-	pSize, _ = strconv.Atoi(pageSize)
+func ParsePageAndPageSize(page, pageSize string) (p, pSize int64) {
+	p, _ = strconv.ParseInt(page, 10, 64)
+	pSize, _ = strconv.ParseInt(pageSize, 10, 64)
 	if p <= 0 {
 		p = 1
 	}

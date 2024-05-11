@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/palp1tate/FlowFederate/internal/util"
+
 	"github.com/palp1tate/FlowFederate/api/types"
 	"github.com/palp1tate/FlowFederate/internal/model"
 
@@ -39,7 +41,8 @@ func GetTaskList(c *gin.Context) {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrParamsInvalid, nil)
 		return
 	}
-	tasks, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindTaskList(u, 1, 10)
+	page, pageSize := util.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
+	tasks, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindTaskList(u, page, pageSize)
 	if err != nil {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetTaskList, nil)
 		return
@@ -77,7 +80,8 @@ func GetServerProgress(c *gin.Context) {
 		return
 	}
 	id, _ := strconv.Atoi(tid)
-	servers, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindServerList(id, 1, 10)
+	page, pageSize := util.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
+	servers, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindServerList(id, page, pageSize)
 	if err != nil {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetServerList, nil)
 		return
@@ -100,7 +104,8 @@ func GetClientProgress(c *gin.Context) {
 		return
 	}
 	id, _ := strconv.Atoi(tid)
-	clients, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindClientList(id, 1, 10)
+	page, pageSize := util.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
+	clients, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindClientList(id, page, pageSize)
 	if err != nil {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetClientList, nil)
 		return
