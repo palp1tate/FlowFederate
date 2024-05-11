@@ -1,0 +1,84 @@
+version: '3.1'
+
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=FlowFederate
+    ports:
+      - "3306:3306"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./FlowFederate.sql:/docker-entrypoint-initdb.d/FlowFederate.sql
+      - ./create_user.sql:/docker-entrypoint-initdb.d/create_user.sql
+    command: [ "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci" ]
+
+  consul:
+    image: consul:1.15.4
+    ports:
+      - "8500:8500"
+      - "8300:8300"
+      - "8301:8301"
+      - "8302:8302"
+      - "8600:8600/udp"
+    command: consul agent -dev -client=0.0.0.0
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: my-rabbit
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  client-1:
+    image: palp1tate/flow-federate-sc:latest
+    ports:
+      - "5001:5001"
+    depends_on:
+      - consul
+      - mysql
+    volumes:
+      - ./service/client/config.yaml:/app/service/client/config.yaml
+      - ./internal/authorization:/app/internal/authorization
+    command: [ "./service/client/run.sh", "-p", "5001" ]
+
+  client-2:
+    image: palp1tate/flow-federate-sc:latest
+    ports:
+      - "5002:5002"
+    depends_on:
+      - consul
+      - mysql
+    volumes:
+      - ./service/client/config.yaml:/app/service/client/config.yaml
+      - ./internal/authorization:/app/internal/authorization
+    command: [ "./service/client/run.sh", "-p", "5002" ]
+
+  edge:
+    image: palp1tate/flow-federate-sc:latest
+    ports:
+      - "5000:5000"
+    depends_on:
+      - consul
+      - mysql
+      - rabbitmq
+      - client-1
+      - client-2
+    volumes:
+      - ./service/edge/config.yaml:/app/service/edge/config.yaml
+      - ./internal/authorization:/app/internal/authorization
+    command: [ "./service/edge/run.sh", "-p", "5000" ]
+
+  api:
+    image: palp1tate/flow-federate-api:latest
+    ports:
+      - "9090:9090"
+    depends_on:
+      - consul
+      - mysql
+      - edge
+    volumes:
+      - ./api/config.yaml:/app/api/config.yaml
+      - ./internal/authorization:/app/internal/authorization
+    command: [ "./run.sh", "-p", "9090" ]
