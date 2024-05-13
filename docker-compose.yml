@@ -4,7 +4,6 @@ services:
   mysql:
     image: mysql:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=FlowFederate
     ports:
       - "3306:3306"
@@ -31,20 +30,11 @@ services:
       - "15672:15672"
       - "5672:5672"
 
-  flow-federate-sc:
+  client-1:
     image: flow-federate-sc:latest
     build:
       context: .
       dockerfile: Dockerfile
-
-  flow-federate-api:
-    image: flow-federate-api:latest
-    build:
-      context: .
-      dockerfile: ./api/Dockerfile
-
-  client-1:
-    image: flow-federate-sc:latest
     ports:
       - "5001:5001"
     depends_on:
@@ -57,6 +47,9 @@ services:
 
   client-2:
     image: flow-federate-sc:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "5002:5002"
     depends_on:
@@ -69,6 +62,9 @@ services:
 
   edge:
     image: flow-federate-sc:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     depends_on:
@@ -84,6 +80,9 @@ services:
 
   api:
     image: flow-federate-api:latest
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
     ports:
       - "9090:9090"
     depends_on:

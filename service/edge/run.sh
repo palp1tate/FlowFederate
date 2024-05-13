@@ -16,6 +16,14 @@ done
 
 echo "Consul is up..."
 
+# 尝试连接到 RabbitMQ
+while ! nc -z rabbitmq 5672; do
+  echo "Waiting for RabbitMQ..."
+  sleep 1
+done
+
+echo "RabbitMQ is up..."
+
 # 设置 PYTHONPATH 环境变量
 export PYTHONPATH=./
 
