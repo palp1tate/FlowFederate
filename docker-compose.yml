@@ -4,6 +4,7 @@ services:
   mysql:
     image: mysql:latest
     environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=FlowFederate
     ports:
       - "3306:3306"
