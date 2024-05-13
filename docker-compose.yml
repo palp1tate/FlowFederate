@@ -3,6 +3,7 @@ version: '3.1'
 services:
   mysql:
     image: mysql:latest
+    container_name: flow-federate-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=FlowFederate
@@ -16,6 +17,7 @@ services:
 
   consul:
     image: consul:1.15.4
+    container_name: flow-federate-consul
     ports:
       - "8500:8500"
       - "8300:8300"
@@ -26,6 +28,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:management
+    container_name: flow-federate-rabbitmq
     hostname: my-rabbit
     ports:
       - "15672:15672"
@@ -33,6 +36,7 @@ services:
 
   client-1:
     image: flow-federate-sc:latest
+    container_name: flow-federate-client-1
     build:
       context: .
       dockerfile: Dockerfile
@@ -48,6 +52,7 @@ services:
 
   client-2:
     image: flow-federate-sc:latest
+    container_name: flow-federate-client-2
     build:
       context: .
       dockerfile: Dockerfile
@@ -63,6 +68,7 @@ services:
 
   edge:
     image: flow-federate-sc:latest
+    container_name: flow-federate-edge
     build:
       context: .
       dockerfile: Dockerfile
@@ -81,6 +87,7 @@ services:
 
   api:
     image: flow-federate-api:latest
+    container_name: flow-federate-api
     build:
       context: .
       dockerfile: ./api/Dockerfile

@@ -14,7 +14,7 @@ class RabbitMQConnection:
     ):
         self.credentials = pika.PlainCredentials(username, password)
         self.parameters = pika.ConnectionParameters(
-            host, port, virtual_host, self.credentials, heartbeat=0
+            host, port, virtual_host, self.credentials, heartbeat=600
         )
 
     def open_connection(self):
