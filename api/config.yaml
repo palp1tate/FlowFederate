@@ -1,23 +1,7 @@
-api:
-  name: FlowFederate-Api
-  tags:
-    - api
-    - FlowFederate
-
-service:
-  edge: EdgeService
-
-consul:
-  host: consul
-  port: 8500
-
-mysql:
-  host: mysql
-  port: 3306
-  database: FlowFederate
-  user: FlowFederate
-  password: 123456
-
-common_name: FlowFederate
-
-debug: true
+host: 127.0.0.1
+port: 8848
+namespace: 45463342-2972-4175-9b8a-e11e505b53e8
+user: nacos
+password: nacos
+dataId: flowfederate-api.yaml
+group: dev

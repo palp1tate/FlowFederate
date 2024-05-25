@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/palp1tate/FlowFederate/api/global"
-	"github.com/palp1tate/FlowFederate/internal/errorx"
+	"github.com/palp1tate/FlowFederate/api/internal/errorx"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"

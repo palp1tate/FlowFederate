@@ -13,7 +13,7 @@ import (
 
 	"github.com/palp1tate/FlowFederate/api/global"
 	"github.com/palp1tate/FlowFederate/api/initialize"
-	"github.com/palp1tate/FlowFederate/internal/util"
+	"github.com/palp1tate/FlowFederate/api/internal/utils"
 
 	"go.uber.org/zap"
 )
@@ -27,13 +27,15 @@ func main() {
 		zap.S().Warn(err)
 		panic(err)
 	}
+	initialize.InitSentinel()
+	initialize.InitValidator()
 	initialize.InitServiceConn()
 
-	host := util.GetIPAddress()
+	host := utils.GetIPAddress()
 	port := flag.Int("p", 0, "port number")
 	flag.Parse()
 	if *port == 0 {
-		*port, _ = util.GetFreePort()
+		*port, _ = utils.GetFreePort()
 	}
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", *port),
@@ -49,7 +51,7 @@ func main() {
 	client := initialize.NewRegistryClient(global.ServerConfig.Consul.Host, global.ServerConfig.Consul.Port)
 	apiName := global.ServerConfig.Api.Name
 	apiTags := global.ServerConfig.Api.Tags
-	apiId := util.GenerateUUID()
+	apiId := utils.GenerateUUID()
 	err := client.Register(host, *port, apiName, apiTags, apiId)
 	if err != nil {
 		zap.S().Panic(err)

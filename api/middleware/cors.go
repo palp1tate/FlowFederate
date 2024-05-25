@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/palp1tate/FlowFederate/internal/errorx"
+	"github.com/palp1tate/FlowFederate/api/internal/errorx"
 
 	"github.com/gin-gonic/gin"
 )

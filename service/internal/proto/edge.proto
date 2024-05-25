@@ -1,0 +1,16 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+package pb;
+option go_package = "./pb";
+
+
+
+service EdgeService {
+  rpc TrainTask (TrainRequest) returns (google.protobuf.Empty);
+}
+
+
+message TrainRequest {
+  string conf = 1;
+  string user_name = 2;
+}

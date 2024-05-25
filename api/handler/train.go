@@ -5,35 +5,30 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/palp1tate/FlowFederate/internal/util"
-
-	"github.com/palp1tate/FlowFederate/api/types"
-	"github.com/palp1tate/FlowFederate/internal/model"
-
 	"github.com/palp1tate/FlowFederate/api/dao"
-	"github.com/palp1tate/FlowFederate/api/form"
-	"github.com/palp1tate/FlowFederate/api/global"
-	"github.com/palp1tate/FlowFederate/internal/errorx"
-	"github.com/palp1tate/FlowFederate/service/edge/pb"
+	"github.com/palp1tate/FlowFederate/api/internal/errorx"
+	"github.com/palp1tate/FlowFederate/api/internal/model"
+	"github.com/palp1tate/FlowFederate/api/internal/utils"
+	"github.com/palp1tate/FlowFederate/api/types"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Train(c *gin.Context) {
-	var trainForm form.TrainForm
-	if err := c.ShouldBind(&trainForm); err != nil {
-		HandleValidatorError(c, err)
-		return
-	}
-	if _, err := global.EdgeServiceClient.TrainTask(context.Background(), &pb.TrainRequest{
-		UserName: trainForm.UserName,
-		Conf:     trainForm.Conf,
-	}); err != nil {
-		HandleGrpcErrorToHttp(c, err)
-		return
-	}
-	HandleHttpResponse(c, http.StatusOK, errorx.Success, nil)
-}
+//func Train(c *gin.Context) {
+//	var trainForm form.TrainForm
+//	if err := c.ShouldBind(&trainForm); err != nil {
+//		HandleValidatorError(c, err)
+//		return
+//	}
+//	if _, err := global.EdgeServiceClient.TrainTask(context.Background(), &pb.TrainRequest{
+//		UserName: trainForm.UserName,
+//		Conf:     trainForm.Conf,
+//	}); err != nil {
+//		HandleGrpcErrorToHttp(c, err)
+//		return
+//	}
+//	HandleHttpResponse(c, http.StatusOK, errorx.Success, nil)
+//}
 
 func GetTaskList(c *gin.Context) {
 	u := c.Query("u")
@@ -41,7 +36,7 @@ func GetTaskList(c *gin.Context) {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrParamsInvalid, nil)
 		return
 	}
-	page, pageSize := util.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
+	page, pageSize := utils.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
 	tasks, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindTaskList(u, page, pageSize)
 	if err != nil {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetTaskList, nil)
@@ -80,7 +75,7 @@ func GetServerProgress(c *gin.Context) {
 		return
 	}
 	id, _ := strconv.Atoi(tid)
-	page, pageSize := util.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
+	page, pageSize := utils.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
 	servers, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindServerList(id, page, pageSize)
 	if err != nil {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetServerList, nil)
@@ -104,7 +99,7 @@ func GetClientProgress(c *gin.Context) {
 		return
 	}
 	id, _ := strconv.Atoi(tid)
-	page, pageSize := util.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
+	page, pageSize := utils.ParsePageAndPageSize(c.Query("page"), c.Query("pageSize"))
 	clients, pages, totalCount, err := dao.NewTrainDao(context.Background()).FindClientList(id, page, pageSize)
 	if err != nil {
 		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrGetClientList, nil)

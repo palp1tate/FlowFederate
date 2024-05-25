@@ -3,9 +3,8 @@ package dao
 import (
 	"context"
 
-	"github.com/palp1tate/FlowFederate/internal/model"
-
 	"github.com/palp1tate/FlowFederate/api/global"
+	"github.com/palp1tate/FlowFederate/api/internal/model"
 
 	"gorm.io/gorm"
 )

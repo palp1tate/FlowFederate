@@ -9,7 +9,7 @@ import (
 func InitTrainRouter(Router *gin.RouterGroup) {
 	TrainRouter := Router.Group("/train")
 	{
-		TrainRouter.POST("/start", handler.Train)
+		// TrainRouter.POST("/start", handler.Train)
 		TrainRouter.GET("/list", handler.GetTaskList)
 		TrainRouter.GET("/detail", handler.GetTask)
 		TrainRouter.GET("/server", handler.GetServerProgress)
