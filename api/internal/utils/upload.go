@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"path/filepath"
 
 	"github.com/palp1tate/FlowFederate/api/global"
@@ -12,8 +14,12 @@ import (
 	"github.com/qiniu/go-sdk/v7/storage"
 )
 
-func UploadFile(data []byte, size int64, suffix string) (url string, err error) {
-	key := fmt.Sprintf("%s%s", GenerateUUID(), suffix)
+func UploadFile(file multipart.File, header *multipart.FileHeader) (url string, err error) {
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return
+	}
+	key := fmt.Sprintf("%s%s", GenerateUUID(), filepath.Ext(header.Filename))
 	putPolicy := storage.PutPolicy{
 		Scope: fmt.Sprintf("%s:%s", global.ServerConfig.QiNiuYun.Bucket, key),
 	}
@@ -27,7 +33,7 @@ func UploadFile(data []byte, size int64, suffix string) (url string, err error) 
 			"x:name": "github logo",
 		},
 	}
-	err = uploader.Put(context.Background(), &ret, upToken, key, bytes.NewReader(data), size, &putExtra)
+	err = uploader.Put(context.Background(), &ret, upToken, key, bytes.NewReader(data), header.Size, &putExtra)
 	if err != nil {
 		return
 	}

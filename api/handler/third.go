@@ -6,18 +6,32 @@ import (
 	"net/http"
 	"time"
 
-	"go.uber.org/zap"
-
-	sentinel "github.com/alibaba/sentinel-golang/api"
-	"github.com/alibaba/sentinel-golang/core/base"
-	"github.com/gin-gonic/gin"
 	"github.com/palp1tate/FlowFederate/api/dao"
 	"github.com/palp1tate/FlowFederate/api/global"
 	"github.com/palp1tate/FlowFederate/api/internal/consts"
 	"github.com/palp1tate/FlowFederate/api/internal/errorx"
 	"github.com/palp1tate/FlowFederate/api/internal/utils"
 	"github.com/palp1tate/FlowFederate/api/types"
+
+	sentinel "github.com/alibaba/sentinel-golang/api"
+	"github.com/alibaba/sentinel-golang/core/base"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
+
+func GetPicCaptcha(ctx *gin.Context) {
+	id, b64s, err := utils.GeneratePicCaptcha()
+	if err != nil {
+		zap.S().Error(err)
+		HandleHttpResponse(ctx, http.StatusInternalServerError, errorx.ErrPicCaptchaGenerate)
+		return
+
+	}
+	HandleHttpResponse(ctx, http.StatusOK, errorx.Success, nil, gin.H{
+		"captchaId": id,
+		"picPath":   b64s,
+	})
+}
 
 func SendSms(c *gin.Context) {
 	sendSmsForm := types.SendSmsForm{}
@@ -109,4 +123,39 @@ func SendSms(c *gin.Context) {
 	}
 
 	HandleHttpResponse(c, http.StatusOK, errorx.Success)
+}
+
+func UploadFile(c *gin.Context) {
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		zap.S().Info(err)
+		HandleHttpResponse(c, http.StatusBadRequest, errorx.ErrParamsInvalid)
+		return
+	}
+	url, err := utils.UploadFile(file, header)
+	if err != nil {
+		zap.S().Error(err)
+		HandleHttpResponse(c, http.StatusInternalServerError, errorx.ErrUploadFileFailed)
+	}
+	token := c.GetString("token")
+	j := utils.NewJWT(global.ServerConfig.JWT.SigningKey, global.ServerConfig.JWT.Expiration)
+	refreshedToken, _ := j.RefreshToken(token)
+	HandleHttpResponse(c, http.StatusOK, errorx.Success, refreshedToken, url)
+}
+
+func DeleteFile(c *gin.Context) {
+	urlForm := types.UrlForm{}
+	if err := c.ShouldBind(&urlForm); err != nil {
+		HandleValidatorError(c, err)
+		return
+	}
+	if err := utils.DeleteFile(urlForm.Url); err != nil {
+		zap.S().Error(err)
+		HandleHttpResponse(c, http.StatusInternalServerError, errorx.ErrDeleteFileFailed)
+		return
+	}
+	token := c.GetString("token")
+	j := utils.NewJWT(global.ServerConfig.JWT.SigningKey, global.ServerConfig.JWT.Expiration)
+	refreshedToken, _ := j.RefreshToken(token)
+	HandleHttpResponse(c, http.StatusOK, errorx.Success, refreshedToken)
 }

@@ -35,14 +35,3 @@ type SendSmsForm struct {
 	Type   int    `form:"type" json:"type" binding:"required,oneof=1 2 3"` // 1表示注册, 2表示登录, 3表示修改密码
 	Role   int    `form:"role" json:"role" binding:"required,oneof=1 2"`   // 1表示用户, 2表示管理员
 }
-
-type AdminUpdateUserForm struct {
-	Id       int    `form:"id" json:"id" binding:"required"`
-	Username string `form:"username" json:"username" binding:"required,min=1,max=10"`
-	Avatar   string `form:"avatar" json:"avatar" binding:"required,url"`
-}
-
-type UpdateAdminForm struct {
-	Username string `form:"username" json:"username" binding:"required,min=1,max=10"`
-	Avatar   string `form:"avatar" json:"avatar" binding:"required,url"`
-}

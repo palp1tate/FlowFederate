@@ -1,5 +1,14 @@
 package types
 
+type User struct {
+	ID        int    `json:"id"`
+	Username  string `json:"username"`
+	Mobile    string `json:"mobile"`
+	Avatar    string `json:"avatar"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
 type TaskWithFormattedTime struct {
 	ID        int     `json:"id"`
 	UserName  string  `json:"user_name"`

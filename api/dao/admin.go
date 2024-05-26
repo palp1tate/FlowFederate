@@ -31,11 +31,6 @@ func (u *AdminDao) FindAdminById(id int) (user *model.User, err error) {
 	return
 }
 
-func (u *AdminDao) UpdateAdmin(user *model.User) (err error) {
-	err = u.Save(&user).Error
-	return
-}
-
 func (u *AdminDao) FindUserList(page int64, pageSize int64) (users []*model.User, pages int64, totalCount int64, err error) {
 	err = global.DB.Model(&model.User{}).Where("role = ?", consts.User).Count(&totalCount).Order("id desc").
 		Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Find(&users).Error
@@ -47,7 +42,6 @@ func (u *AdminDao) FindUserList(page int64, pageSize int64) (users []*model.User
 }
 
 func (u *AdminDao) DeleteUser(user *model.User) (err error) {
-	// err = global.DB.Unscoped().Delete(&user).Error
 	err = global.DB.Delete(&user).Error
 	return
 }

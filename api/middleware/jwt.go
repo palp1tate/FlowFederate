@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/palp1tate/FlowFederate/api/global"
 	"github.com/palp1tate/FlowFederate/api/internal/errorx"
@@ -41,7 +42,10 @@ func JWTAuth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.Set("role", claims.Role)
+		id, _ := strconv.Atoi(claims.ID)
+		role, _ := strconv.Atoi(claims.Role)
+		c.Set("id", id)
+		c.Set("role", role)
 		c.Set("token", token)
 		c.Next()
 	}
