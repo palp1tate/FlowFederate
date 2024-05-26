@@ -18,24 +18,24 @@ type ConsulConfig struct {
 	Port int    `yaml:"port"`
 }
 type RedisConfig struct {
-	Host       string `json:"host"`
-	Port       int    `json:"port"`
-	Database   int    `json:"database"`
-	Expiration int    `json:"expiration"`
+	Host       string `yaml:"host"`
+	Port       int    `yaml:"port"`
+	Database   int    `yaml:"database"`
+	Expiration int    `yaml:"expiration"`
 }
 
 type AliSmsConfig struct {
-	AccessKeyId     string `json:"accessKeyId"`
-	AccessKeySecret string `json:"accessKeySecret"`
-	SignName        string `json:"signName"`
-	TemplateCode    string `json:"templateCode"`
+	AccessKeyId     string `yaml:"accessKeyId"`
+	AccessKeySecret string `yaml:"accessKeySecret"`
+	SignName        string `yaml:"signName"`
+	TemplateCode    string `yaml:"templateCode"`
 }
 
 type QiNiuYunConfig struct {
-	AccessKey string `json:"accessKey"`
-	SecretKey string `json:"secretKey"`
-	Bucket    string `json:"bucket"`
-	Domain    string `json:"domain"`
+	AccessKey string `yaml:"accessKey"`
+	SecretKey string `yaml:"secretKey"`
+	Bucket    string `yaml:"bucket"`
+	Domain    string `yaml:"domain"`
 }
 
 type MySQLConfig struct {

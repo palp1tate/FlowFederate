@@ -15,6 +15,7 @@ import (
 	"github.com/palp1tate/FlowFederate/api/initialize"
 	"github.com/palp1tate/FlowFederate/api/internal/utils"
 
+	"github.com/palp1tate/go-crypto-guard/rsa"
 	"go.uber.org/zap"
 )
 
@@ -22,6 +23,7 @@ func main() {
 	initialize.InitConfig()
 	initialize.InitLogger()
 	initialize.InitMySQL()
+	initialize.InitRedis()
 	router := initialize.Router()
 	if err := initialize.InitTranslator("zh"); err != nil {
 		zap.S().Warn(err)
@@ -30,6 +32,7 @@ func main() {
 	initialize.InitSentinel()
 	initialize.InitValidator()
 	initialize.InitServiceConn()
+	_ = pwd.GenRSAKey(2048)
 
 	host := utils.GetIPAddress()
 	port := flag.Int("p", 0, "port number")

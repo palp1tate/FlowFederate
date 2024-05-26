@@ -13,6 +13,14 @@ const (
 	ErrorTokenNeedMsg        = "需要Token!"
 	ErrorTokenExpiredMsg     = "Token已过期!"
 	ErrorTokenParseFailedMsg = "Token解析失败!"
+	ErrorMobileExistsMsg     = "该手机号已被注册!"
+	ErrorRegisterFailedMsg   = "注册失败!"
+	ErrorGenTokenFailedMsg   = "生成Token失败!"
+	ErrorSendSmsFailedMsg    = "发送短信失败!"
+	ErrorCaptchaExpiredMsg   = "验证码已过期!"
+	ErrorCaptchaIncorrectMsg = "验证码错误!"
+	ErrorTooManyRequestsMsg  = "请求过于频繁!"
+	ErrorMobileNotFoundMsg   = "该手机号未注册!"
 )
 
 var MsgFlags = map[int]string{
@@ -28,6 +36,14 @@ var MsgFlags = map[int]string{
 	ErrTokenNeed:        ErrorTokenNeedMsg,
 	ErrTokenExpired:     ErrorTokenExpiredMsg,
 	ErrTokenParseFailed: ErrorTokenParseFailedMsg,
+	ErrMobileExists:     ErrorMobileExistsMsg,
+	ErrRegisterFailed:   ErrorRegisterFailedMsg,
+	ErrGenTokenFailed:   ErrorGenTokenFailedMsg,
+	ErrSendSmsFailed:    ErrorSendSmsFailedMsg,
+	ErrCaptchaExpired:   ErrorCaptchaExpiredMsg,
+	ErrCaptchaIncorrect: ErrorCaptchaIncorrectMsg,
+	TooManyRequests:     ErrorTooManyRequestsMsg,
+	ErrMobileNotFound:   ErrorMobileNotFoundMsg,
 }
 
 func GetMsg(code int) string {

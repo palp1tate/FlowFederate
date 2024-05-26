@@ -3,6 +3,8 @@ package initialize
 import (
 	"fmt"
 
+	"github.com/palp1tate/FlowFederate/api/internal/model"
+
 	"github.com/palp1tate/FlowFederate/api/global"
 
 	"github.com/redis/go-redis/v9"
@@ -34,6 +36,9 @@ func InitMySQL() {
 		},
 	})
 	if err != nil {
+		panic(err)
+	}
+	if err = db.AutoMigrate(&model.User{}); err != nil {
 		panic(err)
 	}
 	global.DB = db

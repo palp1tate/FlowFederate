@@ -31,7 +31,6 @@ func CreateClient(accessKeyId *string, accessKeySecret *string) (client *dysmsap
 		AccessKeySecret: accessKeySecret,
 	}
 	config.Endpoint = tea.String("dysmsapi.aliyuncs.com")
-	client = &dysmsapi20170525.Client{}
 	client, err = dysmsapi20170525.NewClient(config)
 	return client, err
 }
