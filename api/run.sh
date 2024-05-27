@@ -1,14 +1,5 @@
 #!/bin/sh
 
-# 尝试连接到Nacos
-
-while ! nc -z nacos 8848; do
-  echo "Waiting for Nacos..."
-  sleep 1
-done
-
-echo "Nacos is up..."
-
 # 尝试连接到 MySQL
 while ! nc -z mysql 3306; do
   echo "Waiting for MySQL..."
@@ -16,6 +7,14 @@ while ! nc -z mysql 3306; do
 done
 
 echo "MySQL is up..."
+
+# 尝试连接到 Redis
+while ! nc -z redis 6379; do
+  echo "Waiting for Redis..."
+  sleep 1
+done
+
+echo "Redis is up..."
 
 # 尝试连接到 Consul
 while ! nc -z consul 8500; do

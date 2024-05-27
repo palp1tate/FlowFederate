@@ -12,7 +12,7 @@ import (
 )
 
 func GetClientCredentials() (credentials.TransportCredentials, error) {
-	cert, err := tls.LoadX509KeyPair("internal/authorization/client.crt", "internal/authorization/client.key")
+	cert, err := tls.LoadX509KeyPair("authorization/client.crt", "authorization/client.key")
 	if err != nil {
 		zap.S().Error("LoadX509KeyPair error ", err)
 	}
@@ -35,7 +35,7 @@ func GetClientCredentials() (credentials.TransportCredentials, error) {
 }
 
 func GetServerCredentials() (credentials.TransportCredentials, error) {
-	cert, err := tls.LoadX509KeyPair("internal/authorization/server.crt", "internal/authorization/server.key")
+	cert, err := tls.LoadX509KeyPair("authorization/server.crt", "authorization/server.key")
 	if err != nil {
 		zap.S().Error("LoadX509KeyPair error ", err)
 	}

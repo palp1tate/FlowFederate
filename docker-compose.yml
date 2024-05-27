@@ -3,6 +3,8 @@ name: flow-federate
 services:
   mysql:
     image: mysql:latest
+    networks:
+      - flow-federate-network
     container_name: flow-federate-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -13,10 +15,12 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./FlowFederate.sql:/docker-entrypoint-initdb.d/FlowFederate.sql
       - ./create_user.sql:/docker-entrypoint-initdb.d/create_user.sql
-    command: [ "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci" ]
+    command: [ "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci" ]
 
   consul:
     image: consul:1.15.4
+    networks:
+      - flow-federate-network
     container_name: flow-federate-consul
     ports:
       - "8500:8500"
@@ -26,67 +30,77 @@ services:
       - "8600:8600/udp"
     command: consul agent -dev -client=0.0.0.0
 
-  rabbitmq:
-    image: rabbitmq:management
-    container_name: flow-federate-rabbitmq
-    hostname: my-rabbit
+  redis:
+    image: redis:latest
+    networks:
+      - flow-federate-network
+    container_name: flow-federate-redis
     ports:
-      - "15672:15672"
-      - "5672:5672"
+      - "6379:6379"
 
-  client-1:
-    image: flow-federate-sc:latest
-    container_name: flow-federate-client-1
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "5001:5001"
-    depends_on:
-      - consul
-      - mysql
-    volumes:
-      - ./service/client/config.yaml:/app/service/client/config.yaml
-      - ./internal/authorization:/app/internal/authorization
-    command: [ "./service/client/run.sh", "-p", "5001" ]
+  #  rabbitmq:
+  #    image: rabbitmq:management
+  #    container_name: flow-federate-rabbitmq
+  #    hostname: my-rabbit
+  #    ports:
+  #      - "15672:15672"
+  #      - "5672:5672"
 
-  client-2:
-    image: flow-federate-sc:latest
-    container_name: flow-federate-client-2
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "5002:5002"
-    depends_on:
-      - consul
-      - mysql
-    volumes:
-      - ./service/client/config.yaml:/app/service/client/config.yaml
-      - ./internal/authorization:/app/internal/authorization
-    command: [ "./service/client/run.sh", "-p", "5002" ]
-
-  edge:
-    image: flow-federate-sc:latest
-    container_name: flow-federate-edge
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
-    depends_on:
-      - consul
-      - mysql
-      - rabbitmq
-      - client-1
-      - client-2
-    volumes:
-      - ./service/edge/config.yaml:/app/service/edge/config.yaml
-      - ./internal/authorization:/app/internal/authorization
-    command: [ "./service/edge/run.sh", "-p", "5000" ]
+  #  client-1:
+  #    image: flow-federate-sc:latest
+  #    container_name: flow-federate-client-1
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - "5001:5001"
+  #    depends_on:
+  #      - consul
+  #      - mysql
+  #    volumes:
+  #      - ./service/client/config.yaml:/app/service/client/config.yaml
+  #      - ./internal/authorization:/app/internal/authorization
+  #    command: [ "./service/client/run.sh", "-p", "5001" ]
+  #
+  #  client-2:
+  #    image: flow-federate-sc:latest
+  #    container_name: flow-federate-client-2
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - "5002:5002"
+  #    depends_on:
+  #      - consul
+  #      - mysql
+  #    volumes:
+  #      - ./service/client/config.yaml:/app/service/client/config.yaml
+  #      - ./internal/authorization:/app/internal/authorization
+  #    command: [ "./service/client/run.sh", "-p", "5002" ]
+  #
+  #  edge:
+  #    image: flow-federate-sc:latest
+  #    container_name: flow-federate-edge
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - "5000:5000"
+  #    depends_on:
+  #      - consul
+  #      - mysql
+  #      - rabbitmq
+  #      - client-1
+  #      - client-2
+  #    volumes:
+  #      - ./service/edge/config.yaml:/app/service/edge/config.yaml
+  #      - ./internal/authorization:/app/internal/authorization
+  #    command: [ "./service/edge/run.sh", "-p", "5000" ]
 
   api:
     image: flow-federate-api:latest
+    networks:
+      - flow-federate-network
     container_name: flow-federate-api
     build:
       context: .
@@ -94,10 +108,15 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - consul
       - mysql
-      - edge
+      - redis
+      - consul
+    #      - edge
     volumes:
       - ./api/config.yaml:/app/api/config.yaml
-      - ./internal/authorization:/app/internal/authorization
+      - ./authorization:/app/authorization
     command: [ "./run.sh", "-p", "9090" ]
+
+networks:
+  flow-federate-network:
+    external: true

@@ -37,7 +37,7 @@ WORKDIR /app
 COPY --from=builder /app/main /app/api/run.sh ./
 
 # 将构建阶段的内部文件复制到工作目录的内部文件夹中
-COPY --from=builder /app/internal ./internal/
+COPY --from=builder /app/authorization ./authorization/
 
 # 给 run.sh 和 main 设置为可执行权限
 RUN chmod +x ./run.sh ./main
