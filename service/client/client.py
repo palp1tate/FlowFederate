@@ -44,6 +44,7 @@ server = None
 service_id = str(uuid.uuid4())
 consul = Consul(consul_host=consul_conf["host"], consul_port=consul_conf["port"])
 engine = init_engine()
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
@@ -91,9 +92,7 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
         )
 
         local_model = get_model(model_name)
-
         local_model.load_state_dict(state_dict)
-        device = "cuda" if torch.cuda.is_available() else "cpu"
         local_model = local_model.to(device)
 
         train_datasets, eval_datasets = get_dataset("service/client/data", dataset_type)
