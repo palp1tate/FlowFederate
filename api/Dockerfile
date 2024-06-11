@@ -27,8 +27,12 @@ RUN echo "deb http://mirrors.ustc.edu.cn/ubuntu/ focal main restricted universe 
     echo "deb http://mirrors.ustc.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse" >> /etc/apt/sources.list && \
     echo "deb http://mirrors.ustc.edu.cn/ubuntu/ focal-backports main restricted universe multiverse" >> /etc/apt/sources.list
 
-# 更新 apt-get， 并安装 netcat
-RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
+# 更新系统并安装必要的系统依赖
+RUN apt-get update && apt-get install -y netcat-openbsd tzdata && rm -rf /var/lib/apt/lists/*
+
+# 设置时区为上海时间（东八区）
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # 设置工作目录为/app
 WORKDIR /app

@@ -53,14 +53,12 @@ services:
   client-2:
     image: flow-federate-sc:latest
     container_name: flow-federate-client-2
-    build:
-      context: .
-      dockerfile: Dockerfile
     ports:
       - "5002:5002"
     depends_on:
       - consul
       - mysql
+      - client-1
     volumes:
       - ./service/client/config.yaml:/app/service/client/config.yaml
       - ./internal/authorization:/app/internal/authorization
@@ -69,9 +67,6 @@ services:
   edge:
     image: flow-federate-sc:latest
     container_name: flow-federate-edge
-    build:
-      context: .
-      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     depends_on:
