@@ -50,7 +50,8 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
     try:
         model_name = configuration["model_name"]
         dataset_type = configuration["type"]
-        local_epochs = configuration["local_epochs"]
+        # local_epochs = configuration["local_epochs"]
+        local_epochs = 1
         batch_size = configuration["batch_size"]
         learning_rate = configuration["lr"]
         momentum = configuration["momentum"]
@@ -136,8 +137,6 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
         else:
             raise ValueError(f"Unsupported loss function type: {loss_function_name}")
         logging.info(f"Loss function: {loss_function_name}")
-
-        local_epochs = 1
 
         for epoch in range(local_epochs):
             local_model.train()
