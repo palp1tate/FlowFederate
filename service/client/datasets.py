@@ -2,10 +2,30 @@ import json
 
 import matplotlib.pyplot as plt
 import numpy as np
+from torch.utils.data import Subset
 from torchvision import datasets
 from torchvision import transforms
 
+
 seed = 42
+
+
+def get_subset(dataset, fraction=0.1):
+    """
+    获取数据集的子集
+    :param dataset: 原始数据集
+    :param fraction: 子集占原始数据集的比例
+    :return: 数据集的子集
+    """
+    dataset_size = len(dataset)
+    indices = list(range(dataset_size))
+    subset_size = int(dataset_size * fraction)
+
+    # 随机选择子集
+    np.random.shuffle(indices)
+    subset_indices = indices[:subset_size]
+
+    return Subset(dataset, subset_indices)
 
 
 def get_dataset(dir, name):
@@ -76,7 +96,10 @@ def get_dataset(dir, name):
         )
         eval_dataset = datasets.CIFAR100(dir, train=False, transform=transform_test)
 
-    return train_dataset, eval_dataset
+    train_subset = get_subset(train_dataset, fraction=0.2)
+    eval_subset = get_subset(eval_dataset, fraction=0.2)
+
+    return train_subset, eval_subset
 
 
 # *生成一组非独立同分布（non-IID）的数据集，其中每个客户端的数据集包含了多个类别的样本。
