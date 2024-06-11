@@ -105,18 +105,12 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
                 local_model.parameters(), lr=learning_rate, momentum=momentum
             )
         elif optimizer_name == "adam":
-            # optimizer = torch.optim.Adam(
-            #     local_model.parameters(), lr=learning_rate, betas=(0.9, 0.999)
-            # )
-            optimizer = torch.optim.SGD(
-                local_model.parameters(), lr=learning_rate, momentum=momentum
+            optimizer = torch.optim.Adam(
+                local_model.parameters(), lr=learning_rate, betas=(0.9, 0.999)
             )
         elif optimizer_name == "rmsprop":
-            # optimizer = torch.optim.RMSprop(
-            #     local_model.parameters(), lr=learning_rate, alpha=0.99
-            # )
-            optimizer = torch.optim.SGD(
-                local_model.parameters(), lr=learning_rate, momentum=momentum
+            optimizer = torch.optim.RMSprop(
+                local_model.parameters(), lr=learning_rate, alpha=0.99
             )
         else:
             raise ValueError(f"Unsupported optimizer type: {optimizer_name}")
@@ -128,16 +122,12 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
         if loss_function_name == "cross_entropy":
             criterion = torch.nn.CrossEntropyLoss()
         elif loss_function_name == "mse":
-            # criterion = torch.nn.MSELoss()
-            criterion = torch.nn.CrossEntropyLoss()
+            criterion = torch.nn.MSELoss()
         elif loss_function_name == "nll":
-            # criterion = torch.nn.NLLLoss()
-            criterion = torch.nn.CrossEntropyLoss()
+            criterion = torch.nn.NLLLoss()
         else:
             raise ValueError(f"Unsupported loss function type: {loss_function_name}")
         logging.info(f"Loss function: {loss_function_name}")
-
-        local_epochs = 1
 
         for epoch in range(local_epochs):
             local_model.train()
