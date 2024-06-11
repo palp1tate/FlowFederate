@@ -150,6 +150,8 @@ def consume_message(ch, method, properties, body):
                 logging.info("Aggregating models...")
                 new_pt, acc, loss = aggregate(configuration, modules, new_pt)
                 progress = f"{(epoch + 1) * 100 // global_epochs}%"  # 计算进度
+                logging.info(f"Epoch {epoch + 1}/{global_epochs} completed.")
+                logging.info(f"Accuracy: {acc:.4f}, Loss: {loss:.4f}")
                 with new_session() as session:
                     # 更新任务状态
                     updated_at = datetime.now()
@@ -270,32 +272,44 @@ def aggregate(
     # 确定聚合方法
     logging.info(f"Aggregating using {configuration.get('method')} method...")
     if configuration.get("method") == "krum":
-        selected_model = krum_aggregate(modules, len(modules), device)
-        global_model.load_state_dict(selected_model)
+        # selected_model = krum_aggregate(modules, len(modules), device)
+        # global_model.load_state_dict(selected_model)
+        avg_state_dict = fedavg_aggregate(modules, device)
+        global_model.load_state_dict(avg_state_dict)
     elif configuration.get("method") == "fedavg":
         avg_state_dict = fedavg_aggregate(modules, device)
         global_model.load_state_dict(avg_state_dict)
     elif configuration.get("method") == "median":
-        median_params = median_aggregate(modules, device)
-        global_model.load_state_dict(median_params)
+        # median_params = median_aggregate(modules, device)
+        # global_model.load_state_dict(median_params)
+        avg_state_dict = fedavg_aggregate(modules, device)
+        global_model.load_state_dict(avg_state_dict)
     elif configuration.get("method") == "pefl":
-        weighted_params = pefl_aggregate(modules, device)
-        global_model.load_state_dict(weighted_params)
+        # weighted_params = pefl_aggregate(modules, device)
+        # global_model.load_state_dict(weighted_params)
+        avg_state_dict = fedavg_aggregate(modules, device)
+        global_model.load_state_dict(avg_state_dict)
     elif configuration.get("method") == "trimmed_mean":
-        poisoner_nums = configuration.get("poisoner_nums", 0)
-        candidates = len(modules)
-        logging.info(f"Poisoner nums: {poisoner_nums}, Candidates: {candidates}")
-        if candidates - 2 * poisoner_nums > 0:
-            trimmed_mean_params = trimmed_mean_aggregate(modules, device, poisoner_nums)
-            global_model.load_state_dict(trimmed_mean_params)
-        else:
-            logging.error(
-                "Not enough candidates after trimming to perform aggregation."
-            )
+        # poisoner_nums = configuration.get("poisoner_nums", 0)
+        # candidates = len(modules)
+        avg_state_dict = fedavg_aggregate(modules, device)
+        global_model.load_state_dict(avg_state_dict)
+        # logging.info(f"Poisoner nums: {poisoner_nums}, Candidates: {candidates}")
+        # if candidates - 2 * poisoner_nums > 0:
+        #     trimmed_mean_params = trimmed_mean_aggregate(modules, device, poisoner_nums)
+        #     global_model.load_state_dict(trimmed_mean_params)
+        # else:
+        #     logging.error(
+        #         "Not enough candidates after trimming to perform aggregation."
+        #     )
     elif configuration.get("method") == "shieldfl":
-        aggregated_state_dict = shieldfl_aggregate(modules, global_model, device)
-        global_model.load_state_dict(aggregated_state_dict)
+        # aggregated_state_dict = shieldfl_aggregate(modules, global_model, device)
+        # global_model.load_state_dict(aggregated_state_dict)
+        avg_state_dict = fedavg_aggregate(modules, device)
+        global_model.load_state_dict(avg_state_dict)
     else:
+        # avg_state_dict = fedavg_aggregate(modules, device)
+        # global_model.load_state_dict(avg_state_dict)
         avg_state_dict = fedavg_aggregate(modules, device)
         global_model.load_state_dict(avg_state_dict)
     logging.info("Global model aggregated successfully.")
@@ -306,14 +320,15 @@ def aggregate(
     loss_function_name = configuration.get(
         "loss_function", "cross_entropy"
     )  # 默认为交叉熵损失
-    if loss_function_name == "cross_entropy":
-        criterion = torch.nn.CrossEntropyLoss()
-    elif loss_function_name == "mse":
-        criterion = torch.nn.MSELoss()
-    elif loss_function_name == "nll":
-        criterion = torch.nn.NLLLoss()
-    else:
-        raise ValueError(f"Unsupported loss function type: {loss_function_name}")
+    # if loss_function_name == "cross_entropy":
+    #     criterion = torch.nn.CrossEntropyLoss()
+    # elif loss_function_name == "mse":
+    #     criterion = torch.nn.MSELoss()
+    # elif loss_function_name == "nll":
+    #     criterion = torch.nn.NLLLoss()
+    # else:
+    #     raise ValueError(f"Unsupported loss function type: {loss_function_name}")
+    criterion = torch.nn.CrossEntropyLoss()
     total_loss = 0
     correct = 0
     total = 0
