@@ -150,7 +150,7 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
                 total_train_loss += loss.item()
 
             # 计算平均训练损失
-            avg_train_loss = total_train_loss / len(train_loader)
+            avg_train_loss = round(total_train_loss / len(train_loader), 2)
 
             # 评估模型
             local_model.eval()
@@ -166,12 +166,12 @@ def train_model(pt: bytes, configuration: dict, task_id: int) -> bytes:
                     correct += pred.eq(target.view_as(pred)).sum().item()
 
             # 计算平均验证损失和精度
-            avg_eval_loss = total_eval_loss / len(eval_loader)
-            accuracy = correct / len(eval_loader.dataset)
+            avg_eval_loss = round(total_eval_loss / len(eval_loader), 2)
+            accuracy = round(correct / len(eval_loader.dataset), 2)
 
             print(
-                f"Epoch {epoch + 1}/{local_epochs}, Train Loss: {avg_train_loss:.4f}, Eval Loss: {avg_eval_loss:.4f}, "
-                f"Accuracy: {accuracy:.4f}"
+                f"Epoch {epoch + 1}/{local_epochs}, Train Loss: {avg_train_loss}, Eval Loss: {avg_eval_loss}, "
+                f"Accuracy: {accuracy}"
             )
 
             with new_session() as session:

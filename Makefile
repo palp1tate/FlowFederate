@@ -19,6 +19,7 @@ help:
 # Start development environment
 .PHONY: dev-up
 dev-up:
+	docker-compose build
 	docker-compose up -d
 	docker exec -it flow-federate-rabbitmq rabbitmqctl eval 'application:set_env(rabbit,consumer_timeout,undefined).'
 

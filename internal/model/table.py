@@ -40,8 +40,8 @@ class Task(Base):
     type = Column(String(256))
     status = Column(String(256))
     progress = Column(String(256))
-    accuracy = Column(Float)
-    loss = Column(Float)
+    accuracy = Column(String(2048))
+    loss = Column(String(2048))
 
     clients = relationship(
         "Client", back_populates="task", cascade="all, delete-orphan"

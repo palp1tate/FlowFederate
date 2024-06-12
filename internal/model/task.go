@@ -12,6 +12,6 @@ type Task struct {
 	Type      string    `json:"type" gorm:"column:type"`
 	Status    string    `json:"status" gorm:"column:status"`
 	Progress  string    `json:"progress" gorm:"column:progress"`
-	Accuracy  float32   `json:"accuracy" gorm:"column:accuracy"`
-	Loss      float32   `json:"loss" gorm:"column:loss"`
+	Accuracy  string    `json:"accuracy" gorm:"column:accuracy;size:2048"`
+	Loss      string    `json:"loss" gorm:"column:loss;size:2048"`
 }

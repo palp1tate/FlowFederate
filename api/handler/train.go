@@ -2,18 +2,17 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
-
-	"github.com/palp1tate/FlowFederate/internal/util"
-
-	"github.com/palp1tate/FlowFederate/api/types"
-	"github.com/palp1tate/FlowFederate/internal/model"
 
 	"github.com/palp1tate/FlowFederate/api/dao"
 	"github.com/palp1tate/FlowFederate/api/form"
 	"github.com/palp1tate/FlowFederate/api/global"
+	"github.com/palp1tate/FlowFederate/api/types"
 	"github.com/palp1tate/FlowFederate/internal/errorx"
+	"github.com/palp1tate/FlowFederate/internal/model"
+	"github.com/palp1tate/FlowFederate/internal/util"
 	"github.com/palp1tate/FlowFederate/service/edge/pb"
 
 	"github.com/gin-gonic/gin"
@@ -122,6 +121,13 @@ func GetClientProgress(c *gin.Context) {
 }
 
 func FormatTaskTime(t *model.Task) types.TaskWithFormattedTime {
+	var (
+		accuracy []float32
+		loss     []float32
+	)
+	_ = json.Unmarshal([]byte(t.Accuracy), &accuracy)
+	_ = json.Unmarshal([]byte(t.Loss), &loss)
+
 	return types.TaskWithFormattedTime{
 		ID:        t.ID,
 		UserName:  t.UserName,
@@ -132,8 +138,8 @@ func FormatTaskTime(t *model.Task) types.TaskWithFormattedTime {
 		Type:      t.Type,
 		Status:    t.Status,
 		Progress:  t.Progress,
-		Accuracy:  t.Accuracy,
-		Loss:      t.Loss,
+		Accuracy:  accuracy,
+		Loss:      loss,
 	}
 }
 

@@ -66,7 +66,7 @@ def consume_message(ch, method, properties, body):
 
         # 新建训练任务
         global_epochs = configuration["global_epochs"]
-        local_epochs = configuration["local_epochs"]
+        # local_epochs = configuration["local_epochs"]
         model_name = configuration["model_name"]
         dataset_type = configuration["type"]
 
@@ -122,7 +122,7 @@ def consume_message(ch, method, properties, body):
         torch.save(local_model_state_dict, buffer)
 
         new_pt = buffer.getvalue()
-        logging.info(f"Training model for {local_epochs} epochs...")
+        # logging.info(f"Training model for {local_epochs} epochs...")
         for epoch in range(global_epochs):
             logging.info(f"Epoch {epoch + 1}/{global_epochs}")
             with ThreadPoolExecutor(max_workers=len(services)) as executor:
@@ -151,14 +151,21 @@ def consume_message(ch, method, properties, body):
                 new_pt, acc, loss = aggregate(configuration, modules, new_pt)
                 progress = f"{(epoch + 1) * 100 // global_epochs}%"  # 计算进度
                 logging.info(f"Epoch {epoch + 1}/{global_epochs} completed.")
-                logging.info(f"Accuracy: {acc:.4f}, Loss: {loss:.4f}")
+                logging.info(f"Accuracy: {acc}, Loss: {loss}")
                 with new_session() as session:
                     # 更新任务状态
                     updated_at = datetime.now()
                     task = session.get(Task, task_id)
                     if task:
-                        task.accuracy = acc
-                        task.loss = loss
+                        # 将accuracy和loss添加到数组中
+                        acc_array = json.loads(task.accuracy) if task.accuracy else []
+                        loss_array = json.loads(task.loss) if task.loss else []
+                        acc_array.append(acc)
+                        loss_array.append(loss)
+
+                        # 将数组序列化为字符串
+                        task.accuracy = json.dumps(acc_array)
+                        task.loss = json.dumps(loss_array)
                         task.progress = progress
                         task.updated_at = updated_at
                         task.status = "正常"
@@ -228,7 +235,7 @@ def train_model(address: str, pt: bytes, configuration: str, task_id: int) -> by
             ("grpc.keepalive_time_ms", 0),
         ]
         with grpc.intercept_channel(
-            grpc.secure_channel(address, client_credentials, options=channel_options)
+                grpc.secure_channel(address, client_credentials, options=channel_options)
         ) as channel:
             stub = client_pb2_grpc.ClientServiceStub(channel)
             request = send_stream_data(
@@ -247,7 +254,7 @@ def train_model(address: str, pt: bytes, configuration: str, task_id: int) -> by
 
 
 def aggregate(
-    configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
+        configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
 ) -> (bytes, float, float):
     logging.info("Aggregate Function Aggregating models...")
 
@@ -344,12 +351,11 @@ def aggregate(
 
     avg_loss = total_loss / len(eval_loader)
     accuracy = correct / total
-    print(f"Global Eval Loss: {avg_loss:.4f}, Accuracy: {accuracy:.4f}")
 
     # 保存并返回更新后的全局模型参数
     buf = io.BytesIO()
     torch.save(global_model.state_dict(), buf)
-    return buf.getvalue(), accuracy, avg_loss
+    return buf.getvalue(), round(accuracy, 2), round(avg_loss, 2)
 
 
 class EdgeServicer(edge_pb2_grpc.EdgeServiceServicer):
