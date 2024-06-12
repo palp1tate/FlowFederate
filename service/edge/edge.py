@@ -235,7 +235,7 @@ def train_model(address: str, pt: bytes, configuration: str, task_id: int) -> by
             ("grpc.keepalive_time_ms", 0),
         ]
         with grpc.intercept_channel(
-                grpc.secure_channel(address, client_credentials, options=channel_options)
+            grpc.secure_channel(address, client_credentials, options=channel_options)
         ) as channel:
             stub = client_pb2_grpc.ClientServiceStub(channel)
             request = send_stream_data(
@@ -254,7 +254,7 @@ def train_model(address: str, pt: bytes, configuration: str, task_id: int) -> by
 
 
 def aggregate(
-        configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
+    configuration: dict, modules: Iterable[torch.nn.Module], pt: bytes
 ) -> (bytes, float, float):
     logging.info("Aggregate Function Aggregating models...")
 
