@@ -3,14 +3,13 @@ package initialize
 import (
 	"fmt"
 
-	"gorm.io/gorm/schema"
-
 	"github.com/palp1tate/FlowFederate/api/global"
-	"go.uber.org/zap"
 
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 )
 
 func InitMySQL() {
