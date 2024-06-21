@@ -19,7 +19,7 @@ func InitServiceConn() {
 		zap.S().Error(err)
 	}
 	consul := global.ServerConfig.Consul
-	edgeConn, err := grpc.Dial(
+	edgeConn, err := grpc.NewClient(
 		fmt.Sprintf("consul://%s:%d/%s?wait=14s",
 			consul.Host, consul.Port, global.ServerConfig.Service.Edge),
 		grpc.WithTransportCredentials(credentials),
