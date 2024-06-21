@@ -1,5 +1,5 @@
-# 使用 golang:1.20 作为构建阶段的基础镜像
-FROM golang:1.20 as builder
+# 使用 golang:1.22 作为构建阶段的基础镜像
+FROM golang:1.22 as builder
 
 # 设置工作目录为/app
 WORKDIR /app
