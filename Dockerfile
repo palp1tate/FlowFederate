@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y netcat-openbsd tzdata && rm -rf /var/li
 
 # 设置时区为上海时间（东八区）
 ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
 # 设置工作目录为/app
 WORKDIR /app

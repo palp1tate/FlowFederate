@@ -1,5 +1,5 @@
 # 使用 golang:1.22 作为构建阶段的基础镜像
-FROM golang:1.22 as builder
+FROM golang:1.22 AS builder
 
 # 设置工作目录为/app
 WORKDIR /app
@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y netcat-openbsd tzdata && rm -rf /var/li
 
 # 设置时区为上海时间（东八区）
 ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
 # 设置工作目录为/app
 WORKDIR /app
